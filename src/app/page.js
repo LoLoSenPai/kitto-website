@@ -17,7 +17,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-24">
-      <div className="flex items-center justify-center w-full space-x-20">
+      <div className="flex items-center justify-center w-full space-x-32">
         <button onClick={goToPrevious} className="prev-button">
           <Image src="/images/left-arrow.png" width={120} height={100} alt="Previous" />
         </button>
