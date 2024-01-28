@@ -10,9 +10,18 @@ const Navbar = () => {
         <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
       </div>
       <div className="flex items-center space-x-4">
-        <img src="/images/discord-icon.png" alt="Discord" width={40} height={40} />
-        <img src="/images/x-icon.png" alt="Twitter" width={40} height={40} />
-        <img src="/images/atlas-icon.png" alt="Atlas3" width={40} height={40} />
+        <div className="icon-container">
+          <img src="/images/discord-icon.png" alt="Discord" width={40} height={40} />
+          <img src="/images/discord-icon-hover.png" alt="Discord Hover" className="icon-hover" />
+        </div>
+        <div className="icon-container">
+          <img src="/images/x-icon.png" alt="Twitter" width={40} height={40} />
+          <img src="/images/x-icon-hover.png" alt="Twitter Hover" className="icon-hover" />
+        </div>
+        <div className="icon-container">
+          <img src="/images/atlas-icon.png" alt="Atlas3" width={40} height={40} />
+          <img src="/images/atlas-icon-hover.png" alt="Atlas3 Hover" className="icon-hover" />
+        </div>
       </div>
     </nav>
   );
