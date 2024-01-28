@@ -29,7 +29,7 @@ export default function Home() {
         </button>
       </div>
       <div className="flex items-center justify-center">
-        <Image src="/images/bottom-bar.png" width={300} height={60} alt="Bottom Bar" />
+        <Image src="/images/bottom-bar.png" width={500} height={100} alt="Bottom Bar" />
       </div>
       <div className="flex items-center justify-center mt-8">
         {images.map((_, index) => (
