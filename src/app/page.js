@@ -16,8 +16,8 @@ export default function Home() {
   };
 
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-24">
-      <div className="flex items-center justify-center w-full space-x-32">
+    <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8 lg:p-24">
+      <div className="flex items-center justify-center w-full space-x-4 md:space-x-20 lg:space-x-32">
         <button onClick={goToPrevious} className="prev-button">
           <Image src="/images/left-arrow.png" width={120} height={100} alt="Previous" />
         </button>
@@ -29,7 +29,7 @@ export default function Home() {
         </button>
       </div>
       <div className="flex items-center justify-center">
-        <Image src="/images/bottom-bar.png" width={450} height={80} alt="Bottom Bar" />
+        <Image src="/images/bottom-bar.png" width={300} height={60} alt="Bottom Bar" />
       </div>
       <div className="flex items-center justify-center mt-8">
         {images.map((_, index) => (

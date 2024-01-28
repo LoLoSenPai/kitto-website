@@ -2,11 +2,11 @@ import Image from "next/image";
 
 const Navbar = () => {
   return (
-    <nav className="fixed left-0 right-0 flex items-center justify-between w-full p-4 max-w-[1000px] mx-auto">
+    <nav className="fixed left-0 right-0 flex items-center justify-between w-full p-4 max-w-[1400px] mx-auto">
       <div className="logo">
         <Image src="/logo-kitto.png" alt="Kitto" width={120} height={(120 * 290) / 395} />
       </div>
-      <div>
+      <div className="hidden sm:block">
         <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
       </div>
       <div className="flex items-center space-x-4">
