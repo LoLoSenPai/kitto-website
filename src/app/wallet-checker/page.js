@@ -19,7 +19,7 @@ const WalletChecker = () => {
         const myWallet = solanaWallet;
         const apiKey = "64346ca6-3d02-46b4-9b31-b59eb59dbb57";
         let url = `https://api.helius.xyz/v0/addresses/${myWallet}/transactions?api-key=${apiKey}`;
-
+        const limitDate = new Date('2023-11-21');
 
         const tokenMap = {
             'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
@@ -39,10 +39,15 @@ const WalletChecker = () => {
             if (data && data.length > 0) {
 
                 const filteredTransactions = data.filter(transaction => {
-                    return transaction.tokenTransfers.some(transfer =>
-                        Object.keys(tokenMap).includes(transfer.mint) &&
-                        (transfer.fromUserAccount === myWallet || transfer.toUserAccount === myWallet)
-                    ) && transaction.type !== "CREATE_ORDER";
+                    const transactionDate = new Date(transaction.timestamp * 1000);
+                    return (
+                        transactionDate <= limitDate &&
+                        transaction.tokenTransfers.some(transfer =>
+                            Object.keys(tokenMap).includes(transfer.mint) &&
+                            (transfer.fromUserAccount === myWallet || transfer.toUserAccount === myWallet)
+                        ) &&
+                        transaction.type !== "CREATE_ORDER"
+                    );
                 });
 
                 const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
