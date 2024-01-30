@@ -19,7 +19,7 @@ const WalletChecker = () => {
         const myWallet = solanaWallet;
         const apiKey = "64346ca6-3d02-46b4-9b31-b59eb59dbb57";
         let url = `https://api.helius.xyz/v0/addresses/${myWallet}/transactions?api-key=${apiKey}`;
-        const limitDate = new Date('2023-11-21');
+
 
         const tokenMap = {
             'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
@@ -27,6 +27,8 @@ const WalletChecker = () => {
             'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG': '$BOZO',
             'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': '$JITO'
         };
+
+        const timestamp19Nov2023 = new Date('2023-11-19T00:00:00Z').getTime();
 
         while (true) {
             if (lastSignature) {
@@ -37,18 +39,26 @@ const WalletChecker = () => {
             const data = await response.json();
 
             if (data && data.length > 0) {
+                console.log("Data from API: ", JSON.stringify(data, null, 2));
 
                 const filteredTransactions = data.filter(transaction => {
-                    const transactionDate = new Date(transaction.timestamp * 1000);
-                    return (
-                        transactionDate <= limitDate &&
-                        transaction.tokenTransfers.some(transfer =>
-                            Object.keys(tokenMap).includes(transfer.mint) &&
-                            (transfer.fromUserAccount === myWallet || transfer.toUserAccount === myWallet)
-                        ) &&
-                        transaction.type !== "CREATE_ORDER"
-                    );
+                    const transactionTimestamp = transaction.timestamp * 1000;
+                    console.log("Transaction Timestamp: ", new Date(transactionTimestamp).toLocaleString());
+
+                    if (transactionTimestamp <= timestamp19Nov2023) {
+                        return false; // Exclude transactions on or before 22nd November 2023
+                    }
+
+                    return transaction.tokenTransfers.some(transfer =>
+                        Object.keys(tokenMap).includes(transfer.mint) &&
+                        (transfer.fromUserAccount === myWallet || transfer.toUserAccount === myWallet)
+                    ) && transaction.type !== "CREATE_ORDER";
                 });
+
+                if (filteredTransactions.length === 0) {
+                    console.log("No more relevant transactions available. Stopping further fetch.");
+                    break; // Stop fetching transactions
+                }
 
                 const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
 
@@ -76,7 +86,6 @@ const WalletChecker = () => {
                         type: transaction.type,
                         source: transaction.source,
                         timestamp: new Date(transaction.timestamp * 1000).toLocaleString(),
-                        // tokenTransfers: tokenTransfers.map(t => `Token: ${tokenMap[t.mint]}, Amount: ${t.tokenAmount}, From: ${t.fromUserAccount}, To: ${t.toUserAccount}`)
                     };
                 }));
 
