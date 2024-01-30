@@ -12,7 +12,7 @@ const Navbar = () => {
       </div>
       <Link href="/wallet-checker" className="relative hidden sm:block prev-button">
         <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
-        <span className="absolute top-1.5 left-11">Wallet Checker</span>
+        <span className="absolute text-lg top-1 left-10">Wallet Checker</span>
       </Link>
       <div className="flex items-center space-x-4">
         <div className="icon-container">
