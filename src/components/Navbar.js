@@ -1,14 +1,19 @@
 import Image from "next/image";
+import Link from "next/link";
 
 const Navbar = () => {
   return (
     <nav className="fixed left-0 right-0 flex items-center justify-between w-full p-4 max-w-[1400px] mx-auto">
-      <div className="logo">
+      <Link href='/' className="logo">
         <Image src="/logo-kitto.png" alt="Kitto" width={120} height={(120 * 290) / 395} />
-      </div>
+      </Link>
       <div className="hidden sm:block">
         <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
       </div>
+      <Link href="/wallet-checker" className="relative hidden sm:block prev-button">
+        <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
+        <span className="absolute top-1.5 left-11">Wallet Checker</span>
+      </Link>
       <div className="flex items-center space-x-4">
         <div className="icon-container">
           <a href="https://discord.gg/XtVTM3nNRa" target="_blank" rel="noopener noreferrer">
