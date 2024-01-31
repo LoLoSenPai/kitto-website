@@ -39,7 +39,18 @@ const WalletChecker = () => {
             const data = await response.json();
 
             if (data && data.length > 0) {
-                console.log("Data from API: ", JSON.stringify(data, null, 2));
+
+                // Verify if PYTH airdrop has been received
+                const pythAirdrop = relevantInfo.find(transaction => {
+                    return transaction.description.includes("$PYTH") &&
+                        transaction.description.includes("airdropped");
+                });
+
+                if (pythAirdrop) {
+                    pythAirdropReceived = true;
+                    console.log("PYTH airdrop received. Stopping further fetch.");
+                    break; // Stop fetching transactions
+                }
 
                 const filteredTransactions = data.filter(transaction => {
                     const transactionTimestamp = transaction.timestamp * 1000;
@@ -92,18 +103,6 @@ const WalletChecker = () => {
                 console.log("Relevant Transaction Details: ", JSON.stringify(relevantInfo, null, 2));
 
                 lastSignature = data[data.length - 1].signature;
-
-                // Verify if PYTH airdrop has been received
-                const pythAirdrop = relevantInfo.find(transaction => {
-                    return transaction.description.includes("$PYTH") &&
-                        transaction.description.includes("airdropped");
-                });
-
-                if (pythAirdrop) {
-                    pythAirdropReceived = true;
-                    console.log("PYTH airdrop received. Stopping further fetch.");
-                    break; // Stop fetching transactions
-                }
             } else {
                 console.log("No more transactions available.");
                 break;
