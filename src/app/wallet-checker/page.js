@@ -17,7 +17,7 @@ const WalletChecker = () => {
         setIsLoading(true);
 
         const myWallet = solanaWallet;
-        const apiKey = "64346ca6-3d02-46b4-9b31-b59eb59dbb57";
+        const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
         let url = `https://api.helius.xyz/v0/addresses/${myWallet}/transactions?api-key=${apiKey}`;
 
 
@@ -82,22 +82,27 @@ const WalletChecker = () => {
 
                     let description;
                     if (tokenTransfers.length > 0) {
-                        if (tokenTransfers[0].toUserAccount === myWallet) {
-                            if (tokenTransfers[0].mint === 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG' &&
-                                tokenTransfers[0].fromUserAccount === bozoAirdropSender) {
-                                description = `${myWallet} was airdropped ${tokenTransfers[0].tokenAmount} $BOZO`;
-                            } else {
-                                description = `${myWallet} was airdropped ${tokenTransfers[0].tokenAmount} ${tokenMap[tokenTransfers[0].mint]}`;
-                            }
+                        const transfer = tokenTransfers[0];
+
+                        if (transfer.mint === 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG' && transfer.fromUserAccount === bozoAirdropSender) {
+                            description = `${myWallet} was airdropped ${transfer.tokenAmount} $BOZO`;
+                        } else if (transaction.type === 'UNKNOWN' || !transfer.fromUserAccount) {
+                            description = `${myWallet} was airdropped ${transfer.tokenAmount} ${tokenMap[transfer.mint]}`;
+                        } else if (transaction.type === 'SWAP' && transfer.toUserAccount === myWallet) {
+                            description = `Purchased ${transfer.tokenAmount} ${tokenMap[transfer.mint]}`;
+                        } else {
+                            description = transaction.description || `${myWallet} received ${transfer.tokenAmount} ${tokenMap[transfer.mint] || 'an unknown token'}`;
                         }
+                    } else {
+                        description = transaction.description || 'No description';
                     }
-                    description = description || transaction.description || 'No description';
 
                     return {
                         description: description,
                         type: transaction.type,
                         source: transaction.source,
                         timestamp: new Date(transaction.timestamp * 1000).toLocaleString(),
+                        signature: transaction.signature,
                     };
                 }));
 
