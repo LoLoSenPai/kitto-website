@@ -15,8 +15,9 @@ export default function Home() {
     setCurrentIndex((prevIndex) => (prevIndex < images.length - 1 ? prevIndex + 1 : 0));
   };
 
+
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8 lg:p-24">
+    <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
       <div className="flex items-center justify-center w-full space-x-4 md:space-x-20 lg:space-x-32">
         <button onClick={goToPrevious} className="prev-button">
           <Image src="/images/left-arrow.png" width={120} height={100} alt="Previous" />

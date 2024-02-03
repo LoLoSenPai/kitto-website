@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import TransactionList from '../../components/TransactionList';
+import TokenPrices from "../../components/TokenPrices";
 
 const WalletChecker = () => {
     const [walletData, setWalletData] = useState([]);
@@ -128,6 +129,7 @@ const WalletChecker = () => {
 
     return (
         <main className="flex flex-col min-h-screen p-4 sm:p-8 lg:p-24">
+            <TokenPrices />
             <div className='mt-20 space-x-3'>
                 <h1 className='text-xl font-bold underline decoration-wavy'>Wallet Checker</h1>
                 <input
