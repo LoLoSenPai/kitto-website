@@ -4,8 +4,18 @@ const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [tokenBalances, setTokenBalances] = useState({});
-    const [page, setPage] = useState(1);
-    const transactionsPerPage = 10;
+
+    const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
+    const timestamp19Nov2023 = new Date('2023-11-19T00:00:00Z').getTime();
+    const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
+
+    const tokenMap = {
+        'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '$JUP',
+        'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
+        'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3': '$PYTH',
+        'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG': '$BOZO',
+        'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': '$JITO'
+    };
 
     const parseTransactions = async () => {
 
@@ -14,19 +24,10 @@ const useTransactions = (solanaWallet) => {
 
         setIsLoading(true);
 
-        const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
         let url = `https://api.helius.xyz/v0/addresses/${solanaWallet}/transactions?api-key=${apiKey}`;
 
 
-        const tokenMap = {
-            'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '$JUP',
-            'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
-            'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3': '$PYTH',
-            'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG': '$BOZO',
-            'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': '$JITO'
-        };
 
-        const timestamp19Nov2023 = new Date('2023-11-19T00:00:00Z').getTime();
 
         while (true) {
             if (lastSignature) {
@@ -68,7 +69,6 @@ const useTransactions = (solanaWallet) => {
                     break; // Stop fetching transactions
                 }
 
-                const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
 
 
                 relevantInfo = relevantInfo.concat(filteredTransactions.map(transaction => {
