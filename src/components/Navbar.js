@@ -4,15 +4,24 @@ import Link from "next/link";
 const Navbar = () => {
   return (
     <nav className="static left-0 right-0 flex items-center justify-between w-full p-4 max-w-[1400px] mx-auto">
-      <Link href='/' className="logo">
-        <Image src="/logo-kitto.png" alt="Kitto" width={120} height={(120 * 290) / 395} />
+      <Link href="/">
+        <div className="relative inline-block w-32 h-20">
+          <Image
+            src="/logo-kitto.png"
+            alt="Kitto"
+            width={395}
+            height={290}
+          />
+        </div>
       </Link>
-      <div className="hidden sm:block">
+      <div className="hidden sm:block w-[200px] h-auto">
         <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
       </div>
-      <Link href="/wallet-checker" className="relative hidden sm:block prev-button">
-        <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
-        <span className="absolute text-lg top-1 left-10">Wallet Checker</span>
+      <Link href="/wallet-checker">
+        <div className="relative hidden sm:block prev-button w-[200px] h-auto">
+          <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
+          <span className="absolute text-lg top-1 left-10">Wallet Checker</span>
+        </div>
       </Link>
       <div className="flex items-center space-x-4">
         <div className="icon-container">

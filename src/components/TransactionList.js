@@ -6,8 +6,8 @@ const TransactionList = ({ transactions }) => {
 
     useEffect(() => {
         setTransactionListData(transactions);
-        console.log(transactions);
-        console.log(transactionListData);
+        // console.log(transactions);
+        // console.log(transactionListData);
     }, [transactions]);
 
     return (

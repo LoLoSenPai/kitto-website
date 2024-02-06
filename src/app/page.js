@@ -19,17 +19,17 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
       <div className="flex items-center justify-center w-full space-x-4 md:space-x-20 lg:space-x-32">
-        <button onClick={goToPrevious} className="prev-button">
+        <button onClick={goToPrevious} className="prev-button w-[120px] h-auto">
           <Image src="/images/left-arrow.png" width={120} height={100} alt="Previous" />
         </button>
-        <div className="flex flex-col items-center justify-center">
+        <div className="flex flex-col items-center justify-center w-[200px] h-auto">
           <Image src={images[currentIndex]} width={200} height={200} alt="Sneak Peek" />
         </div>
-        <button onClick={goToNext} className="next-button">
+        <button onClick={goToNext} className="next-button w-[120px] h-auto">
           <Image src="/images/right-arrow.png" width={120} height={100} alt="Next" />
         </button>
       </div>
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center w-[500px] h-auto">
         <Image src="/images/bottom-bar.png" width={500} height={100} alt="Bottom Bar" />
       </div>
       <div className="flex items-center justify-center mt-8">

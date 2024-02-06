@@ -1,5 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+
+import React, { useEffect } from 'react';
+import { useTokenPrices } from "./useTokenPrices";
 
 const tokenData = {
     'jupiter-exchange-solana': {
@@ -25,39 +27,11 @@ const tokenData = {
 };
 
 const TokenPrices = () => {
-
-    const [prices, setPrices] = useState({});
+    const { prices, isLoading } = useTokenPrices();
 
     useEffect(() => {
-        const fetchTokenPrices = async () => {
-            const tokenIds = {
-                JUP: 'jupiter-exchange-solana',
-                WEN: 'wen-4',
-                PYTH: 'pyth-network',
-                BOZO: 'bozo-collective',
-                JITO: 'jito-governance-token'
-            };
-            const ids = Object.values(tokenIds).join(',');
-            const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                setPrices(data);
-            } catch (error) {
-                console.error('Failed to fetch token prices:', error);
-            }
-        };
-
-        if (typeof window !== "undefined") {
-            const savedPrices = localStorage.getItem('tokenPrices');
-            if (savedPrices && savedPrices !== "undefined") {
-                setPrices(JSON.parse(savedPrices));
-            } else {
-                fetchTokenPrices();
-            }
-        }
-    }, []);
+        console.log("Prices:", prices);
+    }, [prices]);
 
     const formatPrice = (price) => {
         const numberPrice = parseFloat(price);
@@ -79,11 +53,8 @@ const TokenPrices = () => {
         <div className="w-full p-4 mx-auto bg-white rounded-lg shadow-lg bg-opacity-20">
             <h2 className="mb-4 text-2xl font-bold text-center text-gray-800">Token Prices</h2>
             <div className="flex flex-wrap items-center justify-around">
-                {Object.entries(prices).map(([tokenId, priceData]) => {
+                {Object.entries(prices || {}).map(([tokenId, priceData]) => {
                     const tokenInfo = tokenData[tokenId];
-                    console.log(`Token Name: ${tokenInfo.name}`);
-                    console.log('Price Data:', priceData);
-
                     return (
                         <div key={tokenId} className="flex flex-col items-center w-full p-4 m-2 rounded-lg md:w-auto">
                             <div className="w-20 h-20 mb-2">

@@ -3,133 +3,25 @@
 import React, { useState } from 'react';
 import TransactionList from '../../components/TransactionList';
 import TokenPrices from "../../components/TokenPrices";
+import TokenInfo from "../../components/TokenInfo";
+import useTransactions from "../../components/useTransactions";
+import { useTokenPrices } from "../../components/useTokenPrices";
 
 const WalletChecker = () => {
-    const [walletData, setWalletData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
     const [solanaWallet, setSolanaWallet] = useState("");
-
-    const parseTransactions = async () => {
-
-        let lastSignature = null;
-        let pythAirdropReceived = false;
-        let relevantInfo = [];
-
-        setIsLoading(true);
-
-        const myWallet = solanaWallet;
-        const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
-        let url = `https://api.helius.xyz/v0/addresses/${myWallet}/transactions?api-key=${apiKey}`;
-
-
-        const tokenMap = {
-            'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '$JUP',
-            'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
-            'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3': '$PYTH',
-            'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG': '$BOZO',
-            'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': '$JITO'
-        };
-
-        const timestamp19Nov2023 = new Date('2023-11-19T00:00:00Z').getTime();
-
-        while (true) {
-            if (lastSignature) {
-                url += `&before=${lastSignature}`;
-            }
-
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data && data.length > 0) {
-
-                // Verify if PYTH airdrop has been received
-                const pythAirdrop = relevantInfo.find(transaction => {
-                    return transaction.description.includes("$PYTH") &&
-                        transaction.description.includes("airdropped");
-                });
-
-                if (pythAirdrop) {
-                    pythAirdropReceived = true;
-                    console.log("PYTH airdrop received. Stopping further fetch.");
-                    break; // Stop fetching transactions
-                }
-
-                const filteredTransactions = data.filter(transaction => {
-                    const transactionTimestamp = transaction.timestamp * 1000;
-                    console.log("Transaction Timestamp: ", new Date(transactionTimestamp).toLocaleString());
-
-                    if (transactionTimestamp <= timestamp19Nov2023) {
-                        return false; // Exclude transactions on or before 22nd November 2023
-                    }
-
-                    return transaction.tokenTransfers.some(transfer =>
-                        Object.keys(tokenMap).includes(transfer.mint) &&
-                        (transfer.fromUserAccount === myWallet || transfer.toUserAccount === myWallet)
-                    ) && transaction.type !== "CREATE_ORDER";
-                });
-
-                if (filteredTransactions.length === 0) {
-                    console.log("No more relevant transactions available. Stopping further fetch.");
-                    break; // Stop fetching transactions
-                }
-
-                const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
-
-                relevantInfo = relevantInfo.concat(filteredTransactions.map(transaction => {
-                    const tokenTransfers = transaction.tokenTransfers.filter(transfer =>
-                        Object.keys(tokenMap).includes(transfer.mint) &&
-                        (transfer.fromUserAccount === myWallet || transfer.toUserAccount === myWallet)
-                    );
-
-                    let description;
-                    if (tokenTransfers.length > 0) {
-                        const transfer = tokenTransfers[0];
-
-                        if (transfer.mint === 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG' && transfer.fromUserAccount === bozoAirdropSender) {
-                            description = `${myWallet} was airdropped ${transfer.tokenAmount} $BOZO`;
-                        } else if (transaction.type === 'UNKNOWN' || !transfer.fromUserAccount) {
-                            description = `${myWallet} was airdropped ${transfer.tokenAmount} ${tokenMap[transfer.mint]}`;
-                        } else if (transaction.type === 'SWAP' && transfer.toUserAccount === myWallet) {
-                            description = `Purchased ${transfer.tokenAmount} ${tokenMap[transfer.mint]}`;
-                        } else {
-                            description = transaction.description || `${myWallet} received ${transfer.tokenAmount} ${tokenMap[transfer.mint] || 'an unknown token'}`;
-                        }
-                    } else {
-                        description = transaction.description || 'No description';
-                    }
-
-                    return {
-                        description: description,
-                        type: transaction.type,
-                        source: transaction.source,
-                        timestamp: new Date(transaction.timestamp * 1000).toLocaleString(),
-                        signature: transaction.signature,
-                    };
-                }));
-
-                console.log("Relevant Transaction Details: ", JSON.stringify(relevantInfo, null, 2));
-
-                lastSignature = data[data.length - 1].signature;
-            } else {
-                console.log("No more transactions available.");
-                break;
-            }
-        }
-        setIsLoading(false);
-
-        return relevantInfo;
-    };
+    const { parseTransactions, walletData, isLoading, tokenBalances } = useTransactions(solanaWallet);
+    const { prices, isLoading: pricesLoading } = useTokenPrices();
 
     const handleCheckClick = () => {
-        parseTransactions().then((data) => {
-            console.log("Data from parseTransactions:", data);
-            setWalletData(data);
-        });
+        parseTransactions();
     };
 
     return (
-        <main className="flex flex-col min-h-screen p-4 sm:p-8 lg:p-24">
+        <main className="flex flex-col min-h-screen p-4 space-y-5 sm:p-8 lg:p-24">
             <TokenPrices />
+            <div className='flex items-center justify-center'>
+                <TokenInfo transactions={walletData} tokenBalances={tokenBalances} />
+            </div>
             <div className='mt-20 space-x-3'>
                 <h1 className='text-xl font-bold underline decoration-wavy'>Wallet Checker</h1>
                 <input
@@ -142,8 +34,10 @@ const WalletChecker = () => {
                 <button onClick={handleCheckClick} disabled={isLoading} className='p-2 text-white bg-black rounded-md'>
                     {isLoading ? 'Loading...' : 'Check'}
                 </button>
-                {walletData.length > 0 && (
-                    <TransactionList transactions={walletData} />
+                {!isLoading && walletData.length > 0 && !pricesLoading && (
+                    <>
+                        <TransactionList transactions={walletData} />
+                    </>
                 )}
             </div>
         </main>
