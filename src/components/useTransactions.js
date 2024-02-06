@@ -4,6 +4,8 @@ const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [tokenBalances, setTokenBalances] = useState({});
+    const [page, setPage] = useState(1);
+    const transactionsPerPage = 10;
 
     const parseTransactions = async () => {
 
@@ -169,10 +171,9 @@ const useTransactions = (solanaWallet) => {
                         signature: transaction.signature,
                         airdropDetails,
                         swapDetails,
+                        transferDetails,
                     };
                 }));
-
-                setTokenBalances({ ...tokenBalances });
 
                 console.log("Relevant Transaction Details: ", JSON.stringify(relevantInfo, null, 2));
 
@@ -182,6 +183,7 @@ const useTransactions = (solanaWallet) => {
                 break;
             }
         }
+        setTokenBalances({ ...tokenBalances });
         setIsLoading(false);
         setWalletData(relevantInfo);
     };
