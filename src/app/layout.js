@@ -7,8 +7,8 @@ import Navbar from "../components/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "Kitto NFT",
-  description: "Onboarding the next generation of NFT collectors.",
+  title: "Kitto",
+  description: "Looking for a cute cat pfp",
 };
 
 export default function RootLayout({ children }) {
