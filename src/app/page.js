@@ -50,8 +50,8 @@ export default function Home() {
         <button onClick={goToPrevious} className="prev-button w-[120px] h-auto mt-28">
           <Image src="/images/left-arrow.png" width={120} height={100} alt="Previous" />
         </button>
-        <div className="flex flex-col items-center justify-center w-[360px] h-auto">
-          <Image src={images[currentIndex]} width={420} height={420} alt="Sneak Peek" />
+        <div className="flex flex-col items-center justify-center w-[420px] h-auto">
+          <img src={images[currentIndex]} width={420} height={420} alt="Sneak Peek" />
         </div>
         <button onClick={goToNext} className="next-button w-[120px] h-auto mt-28">
           <Image src="/images/right-arrow.png" width={120} height={100} alt="Next" />
