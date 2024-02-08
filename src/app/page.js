@@ -5,29 +5,8 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const images = ["/images/sneakpeek-1.png", "/images/sneakpeek-2.png", "/images/sneakpeek-3.png"];
-  const backgrounds = ["/images/background-1.png", "/images/background-2.png", "/images/background-3.png"];
+  const backgrounds = ["/images/Background-1.png", "/images/Background-2.png", "/images/Background-3.png"];
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    backgrounds.forEach(background => {
-      const img = new Image();
-      img.src = background;
-    });
-
-    const changeBackground = () => {
-      document.body.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
-    };
-
-    const imgToLoad = new Image();
-    imgToLoad.src = backgrounds[currentIndex];
-    imgToLoad.onload = changeBackground;
-
-    document.body.style.transition = 'background-image 0.5s ease-in-out';
-
-    return () => {
-      document.body.style.backgroundImage = '';
-    };
-  }, [currentIndex]);
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : images.length - 1));
@@ -36,6 +15,34 @@ export default function Home() {
   const goToNext = () => {
     setCurrentIndex((prevIndex) => (prevIndex < images.length - 1 ? prevIndex + 1 : 0));
   };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      backgrounds.forEach(background => {
+        const img = new window.Image();
+        img.src = background;
+      });
+    }
+
+    document.body.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
+    document.body.style.transition = 'background-image 0.5s ease-in-out';
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'ArrowLeft') {
+        goToPrevious();
+      } else if (event.key === 'ArrowRight') {
+        goToNext();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.backgroundImage = '';
+      document.body.style.transition = '';
+    };
+  }, [currentIndex, goToPrevious, goToNext]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
