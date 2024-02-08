@@ -17,12 +17,12 @@ const Navbar = () => {
       <div className="hidden sm:block w-[200px] h-auto">
         <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
       </div>
-      <Link href="/wallet-checker">
+      {/* <Link href="/wallet-checker">
         <div className="relative hidden sm:block prev-button w-[200px] h-auto">
           <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
           <span className="absolute text-lg top-1 left-10">Wallet Checker</span>
         </div>
-      </Link>
+      </Link> */}
       <div className="flex items-center space-x-4">
         <div className="icon-container">
           <a href="https://discord.gg/XtVTM3nNRa" target="_blank" rel="noopener noreferrer">
