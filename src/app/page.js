@@ -29,8 +29,10 @@ export default function Home() {
 
     const handleKeyDown = (event) => {
       if (event.key === 'ArrowLeft') {
+        event.preventDefault();
         goToPrevious();
       } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
         goToNext();
       }
     };
