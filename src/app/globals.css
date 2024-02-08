@@ -10,8 +10,8 @@ body {
 
 /* Styles for the unselected dot */
 .dot {
-  width: 20px; /* Adjust the size as needed */
-  height: 20px; /* Adjust the size as needed */
+  width: 35px; /* Adjust the size as needed */
+  height: 35px; /* Adjust the size as needed */
   background-image: url("/images/dot-not-selected.png");
   background-size: contain;
   background-repeat: no-repeat;
