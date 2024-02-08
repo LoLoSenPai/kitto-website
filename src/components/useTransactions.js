@@ -124,23 +124,54 @@ const useTransactions = (solanaWallet) => {
                     });
 
                     if (transaction.type === 'SWAP') {
-                        const swapIn = tokenTransfers.find(t => t.fromUserAccount === solanaWallet);
-                        const swapOut = tokenTransfers.find(t => t.toUserAccount === solanaWallet);
+                        const swapTransfers = transaction.tokenTransfers;
 
-                        if (swapOut && !swapIn) {
-                            description = `Purchased ${swapOut.tokenAmount} ${tokenMap[swapOut.mint] || swapOut.mint}`;
-                            swapDetails = {
-                                boughtToken: tokenMap[swapOut.mint] || swapOut.mint,
-                                boughtAmount: swapOut.tokenAmount,
-                            };
-                        } else if (swapIn && swapOut) {
-                            description = `Bought ${swapIn.tokenAmount} ${tokenMap[swapIn.mint] || swapIn.mint} for ${swapOut.tokenAmount} ${tokenMap[swapOut.mint] || swapOut.mint}`;
-                            swapDetails = {
-                                soldToken: tokenMap[swapIn.mint] || swapIn.mint,
-                                soldAmount: swapIn.tokenAmount,
-                                boughtToken: tokenMap[swapOut.mint] || swapOut.mint,
-                                boughtAmount: swapOut.tokenAmount,
-                            };
+                        if (swapTransfers.length >= 2) {
+                            let transferGroups = {};
+
+                            swapTransfers.forEach((transfer) => {
+                                if (transfer.tokenAmount !== 0) {
+                                    if (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet) {
+                                        const tokenName = tokenMap[transfer.mint] || transfer.mint;
+
+                                        if (!transferGroups[tokenName]) {
+                                            transferGroups[tokenName] = [];
+                                        }
+
+                                        transferGroups[tokenName].push(transfer);
+                                    }
+                                }
+                            });
+
+                            let entry, exit;
+
+                            Object.values(transferGroups).forEach((group) => {
+                                group.sort((a, b) => b.tokenAmount - a.tokenAmount);
+                                const selectedTransfer = group[0];
+
+                                if (!entry) {
+                                    entry = {
+                                        token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
+                                        amount: selectedTransfer.tokenAmount,
+                                    };
+                                } else if (!exit && entry.token !== (tokenMap[selectedTransfer.mint] || selectedTransfer.mint)) {
+                                    exit = {
+                                        token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
+                                        amount: selectedTransfer.tokenAmount,
+                                    };
+                                }
+                            });
+
+                            if (entry && exit) {
+                                swapDetails = {
+                                    entry,
+                                    exit,
+                                };
+                            } else {
+                                console.log("Not enough swap transfers found.");
+                            }
+                        } else {
+                            console.log("Not enough swap transfers found.");
                         }
                     }
 
@@ -149,13 +180,23 @@ const useTransactions = (solanaWallet) => {
                         const transferOut = tokenTransfers.find(t => t.fromUserAccount === solanaWallet);
 
                         if (transferIn && !transferOut) {
-                            description = `Received ${transferIn.tokenAmount} ${tokenMap[transferIn.mint] || transferIn.mint}`;
+                            if (transferIn.fromUserAccount === bozoAirdropSender) {
+                                description = `${solanaWallet} was airdropped ${transferIn.tokenAmount} $BOZO`;
+                            } else {
+                                description = `Received ${transferIn.tokenAmount} ${tokenMap[transferIn.mint] || transferIn.mint}`;
+                            }
                             transferDetails = {
                                 receivedToken: tokenMap[transferIn.mint] || transferIn.mint,
                                 receivedAmount: transferIn.tokenAmount,
                             };
                         } else if (transferIn && transferOut) {
-                            description = `Sent ${transferOut.tokenAmount} ${tokenMap[transferOut.mint] || transferOut.mint} to ${transfer.toUserAccount}`;
+                            description = `Sent ${transferOut.tokenAmount} ${tokenMap[transferOut.mint] || transferOut.mint} to ${transferIn.toUserAccount}`;
+                            transferDetails = {
+                                sentToken: tokenMap[transferOut.mint] || transferOut.mint,
+                                sentAmount: transferOut.tokenAmount,
+                            };
+                        } else if (!transferIn && transferOut) {
+                            description = `Sent ${transferOut.tokenAmount} ${tokenMap[transferOut.mint] || transferOut.mint} to ${transferOut.toUserAccount}`;
                             transferDetails = {
                                 sentToken: tokenMap[transferOut.mint] || transferOut.mint,
                                 sentAmount: transferOut.tokenAmount,

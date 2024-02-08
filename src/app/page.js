@@ -1,11 +1,24 @@
 'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const images = ["/images/sneakpeek-1.png", "/images/sneakpeek-2.png", "/images/sneakpeek-3.png", "/images/sneakpeek-4.png", "/images/sneakpeek-5.png"];
+  const images = ["/images/sneakpeek-1.png", "/images/sneakpeek-2.png", "/images/sneakpeek-3.png"];
+  const backgrounds = ["/images/background-1.png", "/images/background-2.png", "/images/background-3.png"];
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    // Appliquer le fond d'écran correspondant à l'index courant
+    document.body.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
+    // Optionnel : Ajouter un effet de transition pour le changement de fond
+    document.body.style.transition = 'background-image 0.5s ease-in-out';
+
+    // Nettoyage : Revenir au fond d'écran par défaut quand le composant est démonté
+    return () => {
+      document.body.style.backgroundImage = '';
+    };
+  }, [currentIndex]); // S'exécute chaque fois que currentIndex change
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : images.length - 1));
@@ -15,7 +28,6 @@ export default function Home() {
     setCurrentIndex((prevIndex) => (prevIndex < images.length - 1 ? prevIndex + 1 : 0));
   };
 
-
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
       <div className="flex items-center justify-center w-full space-x-4 md:space-x-20 lg:space-x-32">
@@ -23,7 +35,7 @@ export default function Home() {
           <Image src="/images/left-arrow.png" width={120} height={100} alt="Previous" />
         </button>
         <div className="flex flex-col items-center justify-center w-[200px] h-auto">
-          <Image src={images[currentIndex]} width={200} height={200} alt="Sneak Peek" />
+          <Image src={images[currentIndex]} width={420} height={420} alt="Sneak Peek" />
         </div>
         <button onClick={goToNext} className="next-button w-[120px] h-auto">
           <Image src="/images/right-arrow.png" width={120} height={100} alt="Next" />
