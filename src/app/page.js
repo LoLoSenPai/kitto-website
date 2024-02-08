@@ -5,11 +5,23 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const images = ["/images/sneakpeek-1.png", "/images/sneakpeek-2.png", "/images/sneakpeek-3.png"];
-  const backgrounds = ["/images/Background-1.png", "/images/Background-2.png", "/images/Background-3.png"];
+  const backgrounds = ["/images/background-1.png", "/images/background-2.png", "/images/background-3.png"];
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    document.body.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
+    backgrounds.forEach(background => {
+      const img = new Image();
+      img.src = background;
+    });
+
+    const changeBackground = () => {
+      document.body.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
+    };
+
+    const imgToLoad = new Image();
+    imgToLoad.src = backgrounds[currentIndex];
+    imgToLoad.onload = changeBackground;
+
     document.body.style.transition = 'background-image 0.5s ease-in-out';
 
     return () => {
