@@ -31,7 +31,7 @@ const Navbar = () => {
           </a>
         </div>
         <div className="icon-container">
-          <a href="https://twitter.com/KittoOnNft" target="_blank" rel="noopener noreferrer">
+          <a href="https://twitter.com/solkitto" target="_blank" rel="noopener noreferrer">
             <img src="/images/x-icon.png" alt="Twitter" width={40} height={40} />
             <img src="/images/x-icon-hover.png" alt="Twitter Hover" className="icon-hover" />
           </a>
