@@ -5,20 +5,17 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const images = ["/images/sneakpeek-1.png", "/images/sneakpeek-2.png", "/images/sneakpeek-3.png"];
-  const backgrounds = ["/images/background-1.png", "/images/background-2.png", "/images/background-3.png"];
+  const backgrounds = ["/images/Background-1.png", "/images/Background-2.png", "/images/Background-3.png"];
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // Appliquer le fond d'écran correspondant à l'index courant
     document.body.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
-    // Optionnel : Ajouter un effet de transition pour le changement de fond
     document.body.style.transition = 'background-image 0.5s ease-in-out';
 
-    // Nettoyage : Revenir au fond d'écran par défaut quand le composant est démonté
     return () => {
       document.body.style.backgroundImage = '';
     };
-  }, [currentIndex]); // S'exécute chaque fois que currentIndex change
+  }, [currentIndex]);
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => (prevIndex > 0 ? prevIndex - 1 : images.length - 1));
