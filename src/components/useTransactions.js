@@ -125,6 +125,11 @@ const useTransactions = (solanaWallet) => {
 
                     if (transaction.type === 'SWAP') {
                         const swapTransfers = transaction.tokenTransfers;
+                        let modifiedDescription = transaction.description.match(/swapped\s.*/i);
+
+                        if (modifiedDescription && modifiedDescription.length > 0) {
+                            description = modifiedDescription[0].charAt(0).toUpperCase() + modifiedDescription[0].slice(1);
+                        }
 
                         if (swapTransfers.length >= 2) {
                             let transferGroups = {};

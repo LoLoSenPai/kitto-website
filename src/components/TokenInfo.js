@@ -7,11 +7,11 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
   const { prices, isLoading: pricesLoading } = useTokenPrices();
 
   const tokenInfo = {
-    "$BOZO": { id: "bozo-collective", imageUrl: "https://assets.coingecko.com/coins/images/34336/standard/IMG_9610-1.png?1704679690", priceAtAirdrop: 0.1 },
-    "$JUP": { id: "jupiter-exchange-solana", imageUrl: "logo-jup.jpg", priceAtAirdrop: 0.1 },
-    "$PYTH": { id: "pyth-network", imageUrl: "https://assets.coingecko.com/coins/images/31924/standard/pyth.png?1701245725", priceAtAirdrop: 0.1 },
-    "$WEN": { id: "wen-4", imageUrl: "https://assets.coingecko.com/coins/images/34856/standard/wen.jpeg?1706281701", priceAtAirdrop: 0.1 },
-    "$JTO": { id: "jito-governance-token", imageUrl: "https://assets.coingecko.com/coins/images/33228/standard/jto.png?1701137022", priceAtAirdrop: 0.1 },
+    "$BOZO": { id: "bozo-collective", imageUrl: "https://assets.coingecko.com/coins/images/34336/standard/IMG_9610-1.png?1704679690", priceAtAirdrop: 0.000000079 },
+    "$JUP": { id: "jupiter-exchange-solana", imageUrl: "logo-jup.jpg", priceAtAirdrop: 0.3 },
+    "$PYTH": { id: "pyth-network", imageUrl: "https://assets.coingecko.com/coins/images/31924/standard/pyth.png?1701245725", priceAtAirdrop: 0.67 },
+    "$WEN": { id: "wen-4", imageUrl: "https://assets.coingecko.com/coins/images/34856/standard/wen.jpeg?1706281701", priceAtAirdrop: 0.000043 },
+    "$JTO": { id: "jito-governance-token", imageUrl: "https://assets.coingecko.com/coins/images/33228/standard/jto.png?1701137022", priceAtAirdrop: 2.06 },
   };
 
   const tokenCorrespondence = {
@@ -169,6 +169,13 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
 
             const tokenNameInPrices = tokenInfo[token] ? tokenInfo[token].id : token;
             const tokenImageUrl = tokenInfo[token] ? tokenInfo[token].imageUrl : 'https://pbs.twimg.com/profile_images/1755725702005927937/ohQkTn50_400x400.jpg';
+            const tokenPriceAtAirdrop = tokenInfo[token] ? tokenInfo[token].priceAtAirdrop : 0;
+
+            const initialValue = airdropped * tokenPriceAtAirdrop;
+            const currentValue = airdropped * formatPrice(prices[tokenNameInPrices]?.usd);
+            const pnl = currentValue - initialValue;
+            const pnlFormatted = pnl >= 0 ? `+${pnl.toFixed(2)}` : pnl.toFixed(2);
+            const pnlClass = pnl >= 0 ? 'text-green-500' : 'text-red-500';
 
             return (
               <div key={token} className='grid grid-cols-8 p-2 text-center bg-white rounded-lg shadow-lg bg-opacity-60'>
@@ -179,10 +186,10 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
                 <div>{isNaN(airdropped) ? 0 : airdropped}</div>
                 <div>{isNaN(current) ? 0 : Math.max(current, 0)}</div>
                 <div>{isNaN(tokenData[token].soldTokens) ? 0 : tokenData[token].soldTokens}</div>
-                <div>?? $</div>
+                <div>{formatPrice(tokenPriceAtAirdrop)}</div>
                 <div>${formatPrice(prices[tokenNameInPrices]?.usd)}</div>
                 <div>{isNaN(current) ? 0 : (Math.max(current, 0) * prices[tokenNameInPrices]?.usd).toFixed(0)} $</div>
-                <div>?? $</div>
+                <div className={`${pnlClass} flex justify-center`}>{pnlFormatted} $</div>
               </div>
             );
           })}
