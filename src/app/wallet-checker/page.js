@@ -17,13 +17,8 @@ const WalletChecker = () => {
     };
 
     return (
-        <main className="flex flex-col min-h-screen p-4 space-y-5 sm:p-8 lg:p-24">
-            <TokenPrices />
-            <div className='flex items-center justify-center'>
-                <TokenInfo transactions={walletData} tokenBalances={tokenBalances} />
-            </div>
-            <div className='mt-20 space-x-3'>
-                <h1 className='text-xl font-bold underline decoration-wavy'>Wallet Checker</h1>
+        <main className="flex flex-col min-h-screen p-4 space-y-5 bg-img sm:p-8 lg:p-24">
+            <div className='flex items-center justify-center space-x-2'>
                 <input
                     type="text"
                     placeholder="Enter Solana Wallet"
@@ -31,13 +26,16 @@ const WalletChecker = () => {
                     onChange={(e) => setSolanaWallet(e.target.value)}
                     className='p-2 my-2 text-black bg-white rounded-md'
                 />
-                <button onClick={handleCheckClick} disabled={isLoading} className='p-2 text-white bg-black rounded-md'>
+                <button onClick={handleCheckClick} disabled={isLoading} className='p-2 text-white bg-black rounded w-28'>
                     {isLoading ? 'Loading...' : 'Check'}
                 </button>
+            </div>
+            <div className='mt-20 space-x-3'>
                 {!isLoading && walletData.length > 0 && !pricesLoading && (
-                    <>
+                    <div className='space-y-10'>
+                        <TokenInfo transactions={walletData} tokenBalances={tokenBalances} />
                         <TransactionList transactions={walletData} />
-                    </>
+                    </div>
                 )}
             </div>
         </main>

@@ -112,13 +112,13 @@ const useTransactions = (solanaWallet) => {
                         if ((transaction.type === 'TRANSFER' && transfer.fromUserAccount === bozoAirdropSender) &&
                             transfer.mint === 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG') {
                             // C'est un airdrop BOZO
-                            description = `${solanaWallet} was airdropped ${transfer.tokenAmount} $BOZO`;
+                            description = `Was airdropped ${transfer.tokenAmount} $BOZO`;
                             airdropDetails['$BOZO'] = (airdropDetails['$BOZO'] || 0) + transfer.tokenAmount;
                         }
 
                         // Other Airdrops with UNKNOWN type
                         if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
-                            description = `${solanaWallet} was airdropped ${transfer.tokenAmount} ${tokenName}`;
+                            description = `Was airdropped ${transfer.tokenAmount} ${tokenName}`;
                             airdropDetails[tokenName] = (airdropDetails[tokenName] || 0) + transfer.tokenAmount;
                         }
                     });
@@ -181,7 +181,7 @@ const useTransactions = (solanaWallet) => {
 
                         if (transferIn && !transferOut) {
                             if (transferIn.fromUserAccount === bozoAirdropSender) {
-                                description = `${solanaWallet} was airdropped ${transferIn.tokenAmount} $BOZO`;
+                                description = `Was airdropped ${transferIn.tokenAmount} $BOZO`;
                             } else {
                                 description = `Received ${transferIn.tokenAmount} ${tokenMap[transferIn.mint] || transferIn.mint}`;
                             }
