@@ -26,7 +26,7 @@ const Navbar = () => {
     <nav className={`transition-transform duration-300 ${showNavbar ? 'translate-y-0' : '-translate-y-full'} fixed top-0 left-0 right-0 z-50 flex items-center justify-between w-full p-4 max-w-[1400px] mx-auto`}>
       <Link href="/">
         <div className="relative inline-block w-32 h-20">
-          <Image
+          <img
             src="/logo-kitto.png"
             alt="Kitto"
             width={395}
@@ -35,7 +35,7 @@ const Navbar = () => {
         </div>
       </Link>
       <div className="hidden sm:block w-[200px] h-auto">
-        <Image src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
+        <img src="/images/top-bar.png" alt="Top Bar" width={200} height={80} />
       </div>
       {/* <Link href="/wallet-checker">
         <div className="relative hidden sm:block prev-button w-[200px] h-auto">

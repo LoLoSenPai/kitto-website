@@ -41,6 +41,10 @@ body {
   transform: scale(0.95);
 }
 
+.simulate-active {
+  transform: scale(0.95);
+}
+
 /* NAVBAR */
 
 .icon-container {
