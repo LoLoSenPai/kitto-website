@@ -6,9 +6,10 @@ import Link from "next/link";
 
 const Navbar = () => {
   const [showNavbar, setShowNavbar] = useState(true);
-  let lastScrollY = window.scrollY;
 
   useEffect(() => {
+    let lastScrollY = window.scrollY;
+
     const handleScroll = () => {
       setShowNavbar(window.scrollY < lastScrollY);
       lastScrollY = window.scrollY;

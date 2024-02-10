@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import TransactionList from '../../components/TransactionList';
-import TokenPrices from "../../components/TokenPrices";
+// import TokenPrices from "../../components/TokenPrices";
 import TokenInfo from "../../components/TokenInfo";
 import useTransactions from "../../components/useTransactions";
 import { useTokenPrices } from "../../components/useTokenPrices";
