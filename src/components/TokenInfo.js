@@ -7,11 +7,11 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
   const { prices, isLoading: pricesLoading } = useTokenPrices();
 
   const tokenInfo = {
-    "$BOZO": { id: "bozo-collective", imageUrl: "https://assets.coingecko.com/coins/images/34336/standard/IMG_9610-1.png?1704679690" },
-    "$JUP": { id: "jupiter-exchange-solana", imageUrl: "logo-jup.jpg" },
-    "$PYTH": { id: "pyth-network", imageUrl: "https://assets.coingecko.com/coins/images/31924/standard/pyth.png?1701245725" },
-    "$WEN": { id: "wen-4", imageUrl: "https://assets.coingecko.com/coins/images/34856/standard/wen.jpeg?1706281701" },
-    "$JTO": { id: "jito-governance-token", imageUrl: "https://assets.coingecko.com/coins/images/33228/standard/jto.png?1701137022" },
+    "$BOZO": { id: "bozo-collective", imageUrl: "https://assets.coingecko.com/coins/images/34336/standard/IMG_9610-1.png?1704679690", priceAtAirdrop: 0.1 },
+    "$JUP": { id: "jupiter-exchange-solana", imageUrl: "logo-jup.jpg", priceAtAirdrop: 0.1 },
+    "$PYTH": { id: "pyth-network", imageUrl: "https://assets.coingecko.com/coins/images/31924/standard/pyth.png?1701245725", priceAtAirdrop: 0.1 },
+    "$WEN": { id: "wen-4", imageUrl: "https://assets.coingecko.com/coins/images/34856/standard/wen.jpeg?1706281701", priceAtAirdrop: 0.1 },
+    "$JTO": { id: "jito-governance-token", imageUrl: "https://assets.coingecko.com/coins/images/33228/standard/jto.png?1701137022", priceAtAirdrop: 0.1 },
   };
 
   const tokenCorrespondence = {

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 body {
+  background-image: url("/images/background.png");
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -57,11 +58,4 @@ body {
 
 .icon-container:hover .icon-hover {
   opacity: 1;
-}
-
-.bg-img {
-  background-image: url("/images/background.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
 }
