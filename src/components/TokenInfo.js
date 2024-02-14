@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTokenPrices } from './useTokenPrices';
 
-const TokenInfo = ({ transactions, tokenBalances }) => {
+const TokenInfo = ({ transactions, tokenBalances, mode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [tokenData, setTokenData] = useState({});
   const { prices, isLoading: pricesLoading } = useTokenPrices();
@@ -9,7 +9,7 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
   const tokenInfo = {
     "$BOZO": { id: "bozo-collective", imageUrl: "https://assets.coingecko.com/coins/images/34336/standard/IMG_9610-1.png?1704679690", priceAtAirdrop: 0.000000079 },
     "$JUP": { id: "jupiter-exchange-solana", imageUrl: "logo-jup.jpg", priceAtAirdrop: 0.3 },
-    "$PYTH": { id: "pyth-network", imageUrl: "https://assets.coingecko.com/coins/images/31924/standard/pyth.png?1701245725", priceAtAirdrop: 0.67 },
+    "$PYTH": { id: "pyth-network", imageUrl: "https://assets.coingecko.com/coins/images/31924/standard/pyth.png?1701245725", priceAtAirdrop: 0.3 },
     "$WEN": { id: "wen-4", imageUrl: "https://assets.coingecko.com/coins/images/34856/standard/wen.jpeg?1706281701", priceAtAirdrop: 0.000043 },
     "$JTO": { id: "jito-governance-token", imageUrl: "https://assets.coingecko.com/coins/images/33228/standard/jto.png?1701137022", priceAtAirdrop: 2.06 },
   };
@@ -140,6 +140,7 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
     }
   }, [transactions, tokenBalances, pricesLoading]);
 
+  const gridClass = mode === "Portfolio" ? "grid-cols-5" : "grid-cols-4";
 
   if (isLoading || pricesLoading) {
     return <div>Loading...</div>;
@@ -149,17 +150,16 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
   return (
     <div className='w-full max-w-6xl p-5 mx-auto'>
       <div className='overflow-hidden'>
-        <div className='grid grid-cols-8 p-2 font-bold text-center'>
+        {/* HEADER */}
+        <div className={`grid ${gridClass} p-2 font-bold text-center`}>
           <div>Token</div>
-          <div>Tokens Received</div>
-          <div>Tokens Sold</div>
-          <div>Tokens Held</div>
-          <div>Purchase Price</div>
+          <div>{mode === "Airdrops" ? "Tokens Received" : "Tokens Held"}</div>
+          {mode === "Portfolio" && <div>Purchase Price</div>}
           <div>Current Price</div>
-          <div>Current Value</div>
-          <div>PnL</div>
+          <div>{mode === "Airdrops" ? "Total Value" : "PnL"}</div>
         </div>
 
+        {/* ROWS */}
         <div className='space-y-3'>
           {Object.keys(tokenData).map((token) => {
             const { airdropped, current } = tokenData[token];
@@ -178,18 +178,17 @@ const TokenInfo = ({ transactions, tokenBalances }) => {
             const pnlClass = pnl >= 0 ? 'text-green-500' : 'text-red-500';
 
             return (
-              <div key={token} className='grid grid-cols-8 p-2 text-center bg-white rounded-lg shadow-lg bg-opacity-60'>
+              <div key={token} className={`grid ${gridClass} p-2 text-center bg-white rounded-lg shadow-lg bg-opacity-60`}>
                 <div className='flex items-center justify-center'>
                   <img src={tokenImageUrl} alt="Logo of the token" className='w-6 h-6 mr-2 rounded-full' />
                   {token}
                 </div>
-                <div>{isNaN(airdropped) ? 0 : airdropped}</div>
-                <div>{isNaN(current) ? 0 : Math.max(current, 0)}</div>
-                <div>{isNaN(tokenData[token].soldTokens) ? 0 : tokenData[token].soldTokens}</div>
-                <div>{formatPrice(tokenPriceAtAirdrop)}</div>
+                <div>{mode === "Airdrops" ? airdropped : Math.max(current, 0)}</div>
+                {mode === "Portfolio" && <div>{formatPrice(tokenPriceAtAirdrop)}</div>}
                 <div>${formatPrice(prices[tokenNameInPrices]?.usd)}</div>
-                <div>{isNaN(current) ? 0 : (Math.max(current, 0) * prices[tokenNameInPrices]?.usd).toFixed(0)} $</div>
-                <div className={`${pnlClass} flex justify-center`}>{pnlFormatted} $</div>
+                <div className={`${pnlClass} flex justify-center`}>
+                  {mode === "Airdrops" ? `$${currentValue.toFixed(2)}` : `${pnlFormatted} $`}
+                </div>
               </div>
             );
           })}
