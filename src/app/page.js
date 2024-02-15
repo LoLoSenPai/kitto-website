@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 
 export default function Home() {
-  const images = ["/images/sneakpeek-1.png", "/images/sneakpeek-2.png", "/images/sneakpeek-3.png", "/images/sneakpeek-4.png", "/images/sneakpeek-5.png"];
-  const backgrounds = ["/images/Background-1.png", "/images/Background-2.png", "/images/Background-3.png", "/images/Background-4.png", "/images/Background-5.png"];
+  const images = ["/images/sneakpeek-1.webp", "/images/sneakpeek-2.webp", "/images/sneakpeek-3.webp", "/images/sneakpeek-4.webp", "/images/sneakpeek-5.webp"];
+  const backgrounds = ["/images/Background-1.webp", "/images/Background-2.webp", "/images/Background-3.webp", "/images/Background-4.webp", "/images/Background-5.webp"];
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
