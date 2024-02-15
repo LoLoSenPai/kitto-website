@@ -8,9 +8,16 @@ export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    backgrounds.forEach(background => {
-      const img = new Image();
-      img.src = background;
+    const preloadImages = backgrounds.map(background => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.src = background;
+      });
+    });
+
+    Promise.all(preloadImages).then(() => {
+      console.log("All images were preloaded.");
     });
   }, []);
 
