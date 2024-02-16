@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
@@ -7,13 +7,13 @@ const useTransactions = (solanaWallet) => {
 
     const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
     const timestamp19Nov2023 = new Date('2023-11-19T00:00:00Z').getTime();
-    const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
+    // const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
 
 
     const cacheKey = `transactions-${solanaWallet}`;
     const cacheTimeKey = `${cacheKey}-timestamp`;
 
-    useEffect(() => {
+    // useEffect(() => {
         // To print data without clicking the button
         // const loadCachedData = () => {
         //     const cachedData = localStorage.getItem(cacheKey);
@@ -31,13 +31,13 @@ const useTransactions = (solanaWallet) => {
         // };
 
         // loadCachedData();
-    }, [solanaWallet]); // Rerun when solanaWallet changes
+    // }, [solanaWallet]); // Rerun when solanaWallet changes
 
     const tokenMap = {
         'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '$JUP',
         'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
         'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3': '$PYTH',
-        'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG': '$BOZO',
+        // 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG': '$BOZO',
         'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': '$JITO'
     };
 
@@ -47,7 +47,7 @@ const useTransactions = (solanaWallet) => {
         const cachedData = localStorage.getItem(cacheKey);
         const cachedTime = localStorage.getItem(cacheTimeKey);
         const now = new Date().getTime();
-    
+
         // Verify if cache is valid
         if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < 48 * 60 * 60 * 1000) {
             const { walletData, tokenBalances } = JSON.parse(cachedData);
@@ -144,12 +144,12 @@ const useTransactions = (solanaWallet) => {
                         }
 
                         // Bozo Airdrop
-                        if ((transaction.type === 'TRANSFER' && transfer.fromUserAccount === bozoAirdropSender) &&
-                            transfer.mint === 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG') {
-                            // C'est un airdrop BOZO
-                            description = `Was airdropped ${transfer.tokenAmount} $BOZO`;
-                            airdropDetails['$BOZO'] = (airdropDetails['$BOZO'] || 0) + transfer.tokenAmount;
-                        }
+                        // if ((transaction.type === 'TRANSFER' && transfer.fromUserAccount === bozoAirdropSender) &&
+                        //     transfer.mint === 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG') {
+                        //     // C'est un airdrop BOZO
+                        //     description = `Was airdropped ${transfer.tokenAmount} $BOZO`;
+                        //     airdropDetails['$BOZO'] = (airdropDetails['$BOZO'] || 0) + transfer.tokenAmount;
+                        // }
 
                         // Other Airdrops with UNKNOWN type
                         if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
@@ -220,11 +220,7 @@ const useTransactions = (solanaWallet) => {
                         const transferOut = tokenTransfers.find(t => t.fromUserAccount === solanaWallet);
 
                         if (transferIn && !transferOut) {
-                            if (transferIn.fromUserAccount === bozoAirdropSender) {
-                                description = `Was airdropped ${transferIn.tokenAmount} $BOZO`;
-                            } else {
-                                description = `Received ${transferIn.tokenAmount} ${tokenMap[transferIn.mint] || transferIn.mint}`;
-                            }
+                            description = `Received ${transferIn.tokenAmount} ${tokenMap[transferIn.mint] || transferIn.mint}`;
                             transferDetails = {
                                 receivedToken: tokenMap[transferIn.mint] || transferIn.mint,
                                 receivedAmount: transferIn.tokenAmount,
@@ -266,7 +262,7 @@ const useTransactions = (solanaWallet) => {
         }
         localStorage.setItem(cacheKey, JSON.stringify({ walletData: relevantInfo, tokenBalances: updatedTokenBalances }));
         localStorage.setItem(cacheTimeKey, new Date().getTime().toString());
-        
+
         setWalletData(relevantInfo);
         setTokenBalances(updatedTokenBalances);
         setIsLoading(false);

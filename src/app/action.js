@@ -18,7 +18,6 @@ export const fetchTokenPrices = async () => {
     JUP: 'jupiter-exchange-solana',
     WEN: 'wen-4',
     PYTH: 'pyth-network',
-    BOZO: 'bozo-collective',
     JITO: 'jito-governance-token',
   };
   const ids = Object.values(tokenIds).join(',');

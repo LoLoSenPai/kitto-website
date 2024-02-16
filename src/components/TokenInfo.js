@@ -7,7 +7,6 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
   const { prices, isLoading: pricesLoading } = useTokenPrices();
 
   const tokenInfo = {
-    "$BOZO": { id: "bozo-collective", imageUrl: "https://assets.coingecko.com/coins/images/34336/standard/IMG_9610-1.png?1704679690", priceAtAirdrop: 0.000000079 },
     "$JUP": { id: "jupiter-exchange-solana", imageUrl: "logo-jup.jpg", priceAtAirdrop: 0.3 },
     "$PYTH": { id: "pyth-network", imageUrl: "https://assets.coingecko.com/coins/images/31924/standard/pyth.png?1701245725", priceAtAirdrop: 0.3 },
     "$WEN": { id: "wen-4", imageUrl: "https://assets.coingecko.com/coins/images/34856/standard/wen.jpeg?1706281701", priceAtAirdrop: 0.000043 },
