@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
@@ -9,6 +9,30 @@ const useTransactions = (solanaWallet) => {
     const timestamp19Nov2023 = new Date('2023-11-19T00:00:00Z').getTime();
     const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
 
+
+    const cacheKey = `transactions-${solanaWallet}`;
+    const cacheTimeKey = `${cacheKey}-timestamp`;
+
+    useEffect(() => {
+        // To print data without clicking the button
+        // const loadCachedData = () => {
+        //     const cachedData = localStorage.getItem(cacheKey);
+        //     const cachedTime = localStorage.getItem(cacheTimeKey);
+        //     const now = new Date().getTime();
+
+        //     if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < 48 * 60 * 60 * 1000) {
+        //         const { walletData, tokenBalances } = JSON.parse(cachedData);
+        //         setWalletData(walletData);
+        //         setTokenBalances(tokenBalances);
+        //         console.log("Loaded data from cache");
+        //     } else {
+        //         parseTransactions();
+        //     }
+        // };
+
+        // loadCachedData();
+    }, [solanaWallet]); // Rerun when solanaWallet changes
+
     const tokenMap = {
         'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '$JUP',
         'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
@@ -18,18 +42,29 @@ const useTransactions = (solanaWallet) => {
     };
 
     const parseTransactions = async () => {
+        if (isLoading) return;
 
-        let lastSignature = null;
-        let relevantInfo = [];
+        const cachedData = localStorage.getItem(cacheKey);
+        const cachedTime = localStorage.getItem(cacheTimeKey);
+        const now = new Date().getTime();
+    
+        // Verify if cache is valid
+        if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < 48 * 60 * 60 * 1000) {
+            const { walletData, tokenBalances } = JSON.parse(cachedData);
+            setWalletData(walletData);
+            setTokenBalances(tokenBalances);
+            console.log("Loaded data from cache");
+            return; // Stop execution here if cache is valid
+        }
 
         setIsLoading(true);
 
-        let url = `https://api.helius.xyz/v0/addresses/${solanaWallet}/transactions?api-key=${apiKey}`;
-
-
-
+        let lastSignature = null;
+        let relevantInfo = [];
+        let updatedTokenBalances = { ...tokenBalances };
 
         while (true) {
+            let url = `https://api.helius.xyz/v0/addresses/${solanaWallet}/transactions?api-key=${apiKey}`;
             if (lastSignature) {
                 url += `&before=${lastSignature}`;
             }
@@ -52,7 +87,7 @@ const useTransactions = (solanaWallet) => {
 
                 const filteredTransactions = data.filter(transaction => {
                     const transactionTimestamp = transaction.timestamp * 1000;
-                    // console.log("Transaction Timestamp: ", new Date(transactionTimestamp).toLocaleString());
+                    console.log("Transaction Timestamp: ", new Date(transactionTimestamp).toLocaleString());
 
                     if (transactionTimestamp <= timestamp19Nov2023) {
                         return false; // Exclude transactions on or before 19th November 2023
@@ -229,9 +264,12 @@ const useTransactions = (solanaWallet) => {
                 break;
             }
         }
-        setTokenBalances({ ...tokenBalances });
-        setIsLoading(false);
+        localStorage.setItem(cacheKey, JSON.stringify({ walletData: relevantInfo, tokenBalances: updatedTokenBalances }));
+        localStorage.setItem(cacheTimeKey, new Date().getTime().toString());
+        
         setWalletData(relevantInfo);
+        setTokenBalances(updatedTokenBalances);
+        setIsLoading(false);
     };
 
     return { parseTransactions, walletData, isLoading, tokenBalances };
