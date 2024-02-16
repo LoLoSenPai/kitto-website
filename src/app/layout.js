@@ -12,7 +12,10 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "Kitto",
   description: "Looking for a cute cat pfp",
-  image: "https://pbs.twimg.com/profile_images/1755725702005927937/ohQkTn50_400x400.jpg",
+  metadataBase: new URL('https://solkitto.com'),
+  openGraph: {
+    image: "https://pbs.twimg.com/profile_images/1755725702005927937/ohQkTn50_400x400.jpg",
+  },
 };
 
 export default function RootLayout({ children }) {
