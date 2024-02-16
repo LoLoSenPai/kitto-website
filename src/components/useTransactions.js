@@ -96,7 +96,7 @@ const useTransactions = (solanaWallet) => {
                     return transaction.tokenTransfers.some(transfer =>
                         Object.keys(tokenMap).includes(transfer.mint) &&
                         (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet)
-                    ) && transaction.type !== "CREATE_ORDER";
+                    ) && transaction.type !== "CREATE_ORDER" && transaction.type !== "TOKEN_MINT";
                 });
 
                 if (filteredTransactions.length === 0) {
@@ -155,6 +155,12 @@ const useTransactions = (solanaWallet) => {
                         if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
                             description = `Was airdropped ${transfer.tokenAmount} ${tokenName}`;
                             airdropDetails[tokenName] = (airdropDetails[tokenName] || 0) + transfer.tokenAmount;
+                        } else if (transaction.type === 'UNKNOWN' && transfer.fromUserAccount === solanaWallet) {
+                            description = `Staked ${transfer.tokenAmount} ${tokenName}`;
+                            transferDetails = {
+                                sentToken: tokenName,
+                                sentAmount: transfer.tokenAmount,
+                            };
                         }
                     });
 
