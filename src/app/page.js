@@ -1,18 +1,19 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect,useRef  } from "react";
 
 export default function Home() {
   const images = ["/images/sneakpeek-1.webp", "/images/sneakpeek-2.webp", "/images/sneakpeek-3.webp", "/images/sneakpeek-4.webp", "/images/sneakpeek-5.webp"];
   const backgrounds = ["/images/Background-1.webp", "/images/Background-2.webp", "/images/Background-3.webp", "/images/Background-4.webp", "/images/Background-5.webp"];
   const [currentIndex, setCurrentIndex] = useState(0);
+  const backgroundRef = useRef();
 
   useEffect(() => {
-    const preloadImages = backgrounds.map(background => {
+    const preloadImages = [...backgrounds, ...images].map(src => {
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = resolve;
-        img.src = background;
+        img.src = src;
       });
     });
 
@@ -22,8 +23,10 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    document.body.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
-    document.body.style.transition = "background-image 0.5s ease-in-out";
+    if (backgroundRef.current) {
+      backgroundRef.current.style.backgroundImage = `url(${backgrounds[currentIndex]})`;
+      backgroundRef.current.style.transition = 'background-image 0.5s ease-in-out';
+    }
   }, [currentIndex]);
 
   const simulateActiveEffect = (buttonId) => {
@@ -62,6 +65,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-8">
+      <div ref={backgroundRef} className="fixed top-0 left-0 w-full h-full bg-center bg-no-repeat bg-cover" style={{ zIndex: -1 }}></div>
       <div className="flex items-center justify-center w-full space-x-4 md:space-x-10 lg:space-x-20">
         <button id="prev-button" onClick={goToPrevious} className="prev-button w-[120px] h-auto mt-28">
           <img src="/images/left-arrow.png" width={120} height={100} alt="Previous" />
