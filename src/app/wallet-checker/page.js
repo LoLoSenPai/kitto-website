@@ -52,7 +52,7 @@ const WalletChecker = () => {
                     Portfolio
                 </button>
                 <button
-                    className={`p-4 ${activeTab === 'Airdrops' ? 'border-b-2 border-blue-500' : ''}`}
+                    className={`p-4 ${activeTab === 'Airdrops' ? 'border-b-[3px] border-amber-900' : ''}`}
                     onClick={() => setActiveTab('Airdrops')}
                 >
                     Airdrops
