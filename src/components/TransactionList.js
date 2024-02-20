@@ -3,13 +3,24 @@ import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
 
 function parseDate(dateStr) {
-    // Split the date string into parts
-    const [date, time] = dateStr.split(' ');
-    const [day, month, year] = date.split('/');
-    const [hours, minutes, seconds] = time.split(':');
+    try {
+        // Split the date string into parts
+        const [date, time] = dateStr.split(' ');
+        const [day, month, year] = date.split('/');
+        const [hours, minutes, seconds] = time.split(':');
 
-    // Construct a new Date object
-    return new Date(year, month - 1, day, hours, minutes, seconds);
+        // Validate date parts
+        if (!day || !month || !year || !hours || !minutes || !seconds) {
+            throw new Error(`Invalid date string: ${dateStr}`);
+        }
+
+        // Construct a new Date object
+        return new Date(year, month - 1, day, hours, minutes, seconds);
+    } catch (error) {
+        console.error(error);
+        // Return null or a new Date with a fallback value
+        return null; // or new Date();
+    }
 }
 
 const TransactionList = ({ transactions }) => {
@@ -27,6 +38,11 @@ const TransactionList = ({ transactions }) => {
                     {transactionListData.map((transaction, index) => {
                         const date = parseDate(transaction.timestamp);
                         const borderColor = index % 2 === 0 ? 'border-amber-900' : 'border-amber-700';
+                        if (!date) {
+                            // Handle the error, skip rendering this transaction, or render with a fallback date
+                            console.error('Invalid date:', transaction.timestamp);
+                            return <div key={index} className='text-red-500'>Invalid date: {transaction.timestamp}</div>;
+                        }
 
                         return (
                             <React.Fragment key={index}>

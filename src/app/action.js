@@ -8,7 +8,7 @@ let cache = {
 const CACHE_DURATION = 3600 * 1000; // 1 hour
 
 export async function fetchTokenPrices() {
-  if (cache.data && Date.now() < cache.expiry) {
+  if (cache.data && typeof cache.expiry === 'number' && Date.now() < cache.expiry) {
     console.log('Serving from cache');
     return cache.data;
   }

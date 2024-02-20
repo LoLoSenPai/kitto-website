@@ -27,17 +27,25 @@ const useTransactions = (solanaWallet) => {
     const parseTransactions = async () => {
         if (isLoading) return;
 
-        const cachedData = localStorage.getItem(cacheKey);
-        const cachedTime = localStorage.getItem(cacheTimeKey);
-        const now = new Date().getTime();
+        try {
+            const cachedData = localStorage.getItem(cacheKey);
+            const cachedTime = localStorage.getItem(cacheTimeKey);
+            const now = new Date().getTime();
 
-        // Verify if cache is valid
-        if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < 24 * 60 * 60 * 1000) {
-            const { walletData, tokenBalances } = JSON.parse(cachedData);
-            setWalletData(walletData);
-            setTokenBalances(tokenBalances);
-            console.log("Loaded data from cache");
-            return; // Stop execution here if cache is valid
+            // Verify if cache is valid
+            if (cachedData && cachedTime) {
+                const parsedCachedTime = parseInt(cachedTime, 10);
+                if (now - parsedCachedTime < 24 * 60 * 60 * 1000) {
+                    const { walletData, tokenBalances } = JSON.parse(cachedData);
+                    setWalletData(walletData);
+                    setTokenBalances(tokenBalances);
+                    console.log("Loaded data from cache");
+                    return; // Stop execution here if cache is valid
+                }
+            }
+        } catch (error) {
+            console.error('Error reading from cache', error);
+            // Handle error or invalidate cache
         }
 
         setIsLoading(true);
