@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTokenPrices } from './useTokenPrices';
 
 const TokenInfo = ({ transactions, tokenBalances, mode }) => {
+  console.log('Token Balances at TokenInfo start:', tokenBalances);
+
   const [isLoading, setIsLoading] = useState(true);
   const [tokenData, setTokenData] = useState({});
   const { prices, isLoading: pricesLoading } = useTokenPrices();
@@ -13,10 +15,7 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
     "$JTO": { id: "jito-governance-token", imageUrl: "https://assets.coingecko.com/coins/images/33228/standard/jto.png?1701137022", priceAtAirdrop: 2.06 },
   };
 
-  const tokenCorrespondence = {
-    'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v': 'USDC',
-    'So11111111111111111111111111111111111111112': 'SOL',
-  };
+  const usdcId = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
   const formatPrice = (price) => {
     const numberPrice = parseFloat(price);
@@ -35,109 +34,53 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
   };
 
   useEffect(() => {
-    const calculateTokenData = () => {
-      const newTokenData = {};
+    const newTokenData = {};
 
-      transactions.forEach((transaction) => {
+    const trackedTokens = ['$JUP', '$WEN', '$JTO', '$PYTH'];
+    trackedTokens.forEach(token => {
+      newTokenData[token] = {
+        airdropped: 0,
+        current: tokenBalances[token] || 0,
+        boughtAmount: 0,
+        boughtTotalCost: 0,
+        soldAmount: 0,
+        soldTotalRevenue: 0,
+      };
+    });
 
-        console.log("Transaction:", transaction);
-        console.log("Swap Details Length:", Object.keys(transaction.swapDetails || {}).length);
+    transactions.forEach((transaction) => {
 
+      console.log("Transaction:", transaction);
 
-        if (transaction.swapDetails) {
-          console.log("Swap Details:", transaction.swapDetails);
-        }
-        if (transaction.transferDetails) {
-          console.log("Transfer Details:", transaction.transferDetails);
-        }
-
-        if (transaction.type === 'UNKNOWN' || !transaction.fromUserAccount) {
-          // Airdrop
-          const tokenName = Object.keys(transaction.airdropDetails)[0];
-          const airdropAmount = transaction.airdropDetails[tokenName];
-
-          if (!newTokenData[tokenName]) {
-            newTokenData[tokenName] = {
-              airdropped: airdropAmount || 0,
-              current: tokenBalances[tokenName] || 0,
-              soldTokens: 0,
-              swapValue: 0,
-            };
-          } else {
-            newTokenData[tokenName].airdropped += airdropAmount || 0;
-          }
-        }
-
-        if (transaction.type === 'SWAP' && transaction.swapDetails) {
-          console.log("Valid Swap Details:", transaction.swapDetails);
-          const { entry, exit } = transaction.swapDetails;
-
-          // Determine the token name from entry or exit
-          const soldToken = entry?.token || exit?.token || null;
-          const tokenName = tokenInfo[soldToken] ? tokenInfo[soldToken].id : soldToken;
-
-          if (!newTokenData[tokenName]) {
-            newTokenData[tokenName] = {
-              airdropped: 0,
-              current: tokenBalances[tokenName] || 0,
-              soldTokens: 0,
-              swapValue: 0,
-              soldTokenNames: {},
-            };
-          }
-
-          newTokenData[tokenName].soldTokens += entry?.amount || 0;
-
-          if (exit) {
-            const exitTokenAddress = exit.token;
-            const exitTokenName = tokenCorrespondence[exitTokenAddress] || exitTokenAddress;
-            newTokenData[tokenName].soldTokenNames[exitTokenName] = true;
-          }
-        }
-      });
-
-      Object.keys(newTokenData).forEach((tokenName) => {
-        const tokenData = newTokenData[tokenName];
-        const tokenNameInPrices = tokenInfo[tokenName] ? tokenInfo[tokenName].id : tokenName;
-
-        let totalSwaps = 0;
-        let totalValue = 0;
-
-        transactions.forEach((transaction) => {
-          if (
-            transaction.type === 'SWAP' &&
-            transaction.swapDetails &&
-            transaction.swapDetails.exit.token === tokenName
-          ) {
-            totalSwaps++;
-
-            const exitTokenAddress = transaction.swapDetails.exit.token;
-            const exitTokenName = tokenCorrespondence[exitTokenAddress] || exitTokenAddress;
-
-            totalValue += transaction.swapDetails.exit.amount * prices[tokenNameInPrices]?.usd || 0;
-
-            if (!tokenData.soldTokenNames) {
-              tokenData.soldTokenNames = {};
-            }
-
-            tokenData.soldTokenNames[exitTokenName] = true;
+      if (transaction.type === 'UNKNOWN' && transaction.airdropDetails) {
+        Object.entries(transaction.airdropDetails).forEach(([tokenKey, amount]) => {
+          if (newTokenData[tokenKey]) {
+            newTokenData[tokenKey].airdropped += amount;
           }
         });
+      }
 
-        tokenData.totalSwaps = totalSwaps;
-        tokenData.totalValue = totalValue;
-      });
+      // Swaps
+      if (transaction.type === 'SWAP' && transaction.swapDetails) {
+        const { entry, exit } = transaction.swapDetails;
 
-      console.log("Final Token Data:", newTokenData);
+        if (newTokenData[exit.token]) {
+          newTokenData[exit.token].boughtAmount += exit.amount;
+          newTokenData[exit.token].boughtTotalCost += (entry.amount);
+        }
 
-      setTokenData(newTokenData);
-      setIsLoading(false);
-    };
+        if (newTokenData[entry.token]) {
+          newTokenData[entry.token].soldAmount += entry.amount;
+          newTokenData[entry.token].soldTotalRevenue += (exit.amount);
+        }
+      }
+    });
 
-    if (!pricesLoading) {
-      calculateTokenData();
-    }
+    setTokenData(newTokenData);
+    console.log('newTokenData:', newTokenData);
+    setIsLoading(false);
   }, [transactions, tokenBalances, pricesLoading]);
+
 
   const gridClass = mode === "Portfolio" ? "grid-cols-5" : "grid-cols-4";
 
@@ -153,7 +96,7 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
         <div className={`grid ${gridClass} p-2 font-bold text-center`}>
           <div>Token</div>
           <div>{mode === "Airdrops" ? "Tokens Received" : "Tokens Held"}</div>
-          {mode === "Portfolio" && <div>Purchase Price</div>}
+          {mode === "Portfolio" && <div>Airdrop Price</div>}
           <div>Current Price</div>
           <div>{mode === "Airdrops" ? "Total Value" : "PnL"}</div>
         </div>
@@ -161,7 +104,7 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
         {/* ROWS */}
         <div className='space-y-3'>
           {Object.keys(tokenData).map((token) => {
-            const { airdropped, current } = tokenData[token];
+            const { airdropped, current, boughtAmount, boughtTotalCost, soldAmount, soldTotalRevenue } = tokenData[token];
             if ((airdropped === 0 || isNaN(airdropped)) && (current === 0 || isNaN(current))) {
               return null;
             }
@@ -170,11 +113,22 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
             const tokenImageUrl = tokenInfo[token] ? tokenInfo[token].imageUrl : 'https://pbs.twimg.com/profile_images/1755725702005927937/ohQkTn50_400x400.jpg';
             const tokenPriceAtAirdrop = tokenInfo[token] ? tokenInfo[token].priceAtAirdrop : 0;
 
-            const initialValue = airdropped * tokenPriceAtAirdrop;
-            const currentValue = airdropped * formatPrice(prices[tokenNameInPrices]?.usd);
-            const pnl = currentValue - initialValue;
-            const pnlFormatted = pnl >= 0 ? `+${pnl.toFixed(2)}` : pnl.toFixed(2);
-            const pnlClass = pnl >= 0 ? 'text-green-500' : 'text-red-500';
+            const currentPrice = prices[tokenNameInPrices]?.usd || 0;
+
+            const initialValueAirdropped = airdropped * tokenPriceAtAirdrop;
+            const currentValueAirdropped = airdropped * currentPrice;
+            const pnlAirdropped = currentValueAirdropped - initialValueAirdropped;
+
+            const averageBuyPrice = boughtAmount > 0 ? boughtTotalCost / boughtAmount : 0;
+            const pnlFromBuying = boughtAmount * (currentPrice - averageBuyPrice);
+        
+            const averageSellPrice = soldAmount > 0 ? soldTotalRevenue / soldAmount : 0;
+            const pnlFromSelling = soldAmount * (averageSellPrice - tokenPriceAtAirdrop);
+
+            const totalPnL = pnlAirdropped + pnlFromBuying + pnlFromSelling;
+
+            const pnlFormatted = totalPnL >= 0 ? `+${totalPnL.toFixed(2)}` : totalPnL.toFixed(2);
+            const pnlClass = mode === "Portfolio" ? (totalPnL >= 0 ? 'text-green-500' : 'text-red-500') : 'text-green-500';
 
             return (
               <div key={token} className={`grid ${gridClass} p-2 text-center bg-white rounded-lg shadow-lg bg-opacity-60`}>
@@ -186,7 +140,7 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
                 {mode === "Portfolio" && <div>{formatPrice(tokenPriceAtAirdrop)}</div>}
                 <div>${formatPrice(prices[tokenNameInPrices]?.usd)}</div>
                 <div className={`${pnlClass} flex justify-center`}>
-                  {mode === "Airdrops" ? `$${currentValue.toFixed(2)}` : `${pnlFormatted} $`}
+                  {mode === "Airdrops" ? `$${currentValueAirdropped.toFixed(2)}` : `${pnlFormatted} $`}
                 </div>
               </div>
             );

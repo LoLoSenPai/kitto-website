@@ -7,37 +7,14 @@ const useTransactions = (solanaWallet) => {
 
     const apiKey = process.env.NEXT_PUBLIC_HELIUS_API_KEY;
     const timestamp19Nov2023 = new Date('2023-11-19T00:00:00Z').getTime();
-    // const bozoAirdropSender = '6esfV2ZaR1YN6arDZATkfqBsSTTgVNhHtBQLtjY2C7Dc';
-
 
     const cacheKey = `transactions-${solanaWallet}`;
     const cacheTimeKey = `${cacheKey}-timestamp`;
-
-    // useEffect(() => {
-        // To print data without clicking the button
-        // const loadCachedData = () => {
-        //     const cachedData = localStorage.getItem(cacheKey);
-        //     const cachedTime = localStorage.getItem(cacheTimeKey);
-        //     const now = new Date().getTime();
-
-        //     if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < 48 * 60 * 60 * 1000) {
-        //         const { walletData, tokenBalances } = JSON.parse(cachedData);
-        //         setWalletData(walletData);
-        //         setTokenBalances(tokenBalances);
-        //         console.log("Loaded data from cache");
-        //     } else {
-        //         parseTransactions();
-        //     }
-        // };
-
-        // loadCachedData();
-    // }, [solanaWallet]); // Rerun when solanaWallet changes
 
     const tokenMap = {
         'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN': '$JUP',
         'WENWENvqqNya429ubCdR81ZmD69brwQaaBYY6p3LCpk': '$WEN',
         'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3': '$PYTH',
-        // 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG': '$BOZO',
         'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': '$JITO'
     };
 
@@ -49,7 +26,7 @@ const useTransactions = (solanaWallet) => {
         const now = new Date().getTime();
 
         // Verify if cache is valid
-        if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < 48 * 60 * 60 * 1000) {
+        if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < 24 * 60 * 60 * 1000) {
             const { walletData, tokenBalances } = JSON.parse(cachedData);
             setWalletData(walletData);
             setTokenBalances(tokenBalances);
@@ -86,8 +63,8 @@ const useTransactions = (solanaWallet) => {
                 }
 
                 const filteredTransactions = data.filter(transaction => {
+                    // console.log('transaction:', transaction);
                     const transactionTimestamp = transaction.timestamp * 1000;
-                    console.log("Transaction Timestamp: ", new Date(transactionTimestamp).toLocaleString());
 
                     if (transactionTimestamp <= timestamp19Nov2023) {
                         return false; // Exclude transactions on or before 19th November 2023
@@ -96,7 +73,7 @@ const useTransactions = (solanaWallet) => {
                     return transaction.tokenTransfers.some(transfer =>
                         Object.keys(tokenMap).includes(transfer.mint) &&
                         (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet)
-                    ) && transaction.type !== "CREATE_ORDER" && transaction.type !== "TOKEN_MINT";
+                    ) && transaction.type !== "TOKEN_MINT";
                 });
 
                 if (filteredTransactions.length === 0) {
@@ -104,9 +81,9 @@ const useTransactions = (solanaWallet) => {
                     break; // Stop fetching transactions
                 }
 
+                const finalFilteredTransactions = filteredTransactions.filter(transaction => transaction.type !== "CREATE_ORDER");
 
-
-                relevantInfo = relevantInfo.concat(filteredTransactions.map(transaction => {
+                relevantInfo = relevantInfo.concat(finalFilteredTransactions.map(transaction => {
                     let description = transaction.description || 'No description';
                     let airdropDetails = {};
                     let swapDetails = {};
@@ -120,38 +97,30 @@ const useTransactions = (solanaWallet) => {
                     tokenTransfers.forEach(transfer => {
                         const tokenName = tokenMap[transfer.mint] || transfer.mint;
 
-                        if (!tokenBalances[tokenName]) {
-                            tokenBalances[tokenName] = 0;
+                        if (!updatedTokenBalances[tokenName]) {
+                            updatedTokenBalances[tokenName] = 0;
                         }
 
                         if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
                             // Airdrop
-                            tokenBalances[tokenName] += transfer.tokenAmount;
-                        } else if (transaction.type === 'SWAP' && transfer.fromUserAccount === solanaWallet) {
-                            // Swap exit
-                            tokenBalances[tokenName] -= transfer.tokenAmount;
+                            updatedTokenBalances[tokenName] += transfer.tokenAmount;
                         } else if (transaction.type === 'SWAP' && transfer.toUserAccount === solanaWallet) {
-                            // Swap entry
-                            tokenBalances[tokenName] += transfer.tokenAmount;
+                            // Swap received
+                            updatedTokenBalances[tokenName] += transfer.tokenAmount;
+                        } else if (transaction.type === 'SWAP' && transfer.fromUserAccount === solanaWallet) {
+                            // Swap sent
+                            updatedTokenBalances[tokenName] -= transfer.tokenAmount;
                         } else if (transaction.type === 'TRANSFER' && transfer.toUserAccount === solanaWallet) {
                             // Transfer received
-                            tokenBalances[tokenName] += transfer.tokenAmount;
+                            updatedTokenBalances[tokenName] += transfer.tokenAmount;
                         } else if (transaction.type === 'TRANSFER' && transfer.fromUserAccount === solanaWallet) {
                             // Transfer sent
-                            tokenBalances[tokenName] -= transfer.tokenAmount;
+                            updatedTokenBalances[tokenName] -= transfer.tokenAmount;
                         } else {
                             console.log("Unknown transaction type: ", transaction.type);
                         }
 
-                        // Bozo Airdrop
-                        // if ((transaction.type === 'TRANSFER' && transfer.fromUserAccount === bozoAirdropSender) &&
-                        //     transfer.mint === 'BoZoQQRAmYkr5iJhqo7DChAs7DPDwEZ5cv1vkYC9yzJG') {
-                        //     // C'est un airdrop BOZO
-                        //     description = `Was airdropped ${transfer.tokenAmount} $BOZO`;
-                        //     airdropDetails['$BOZO'] = (airdropDetails['$BOZO'] || 0) + transfer.tokenAmount;
-                        // }
-
-                        // Other Airdrops with UNKNOWN type
+                        // Airdrops with UNKNOWN type
                         if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
                             description = `Was airdropped ${transfer.tokenAmount} ${tokenName}`;
                             airdropDetails[tokenName] = (airdropDetails[tokenName] || 0) + transfer.tokenAmount;
@@ -166,6 +135,7 @@ const useTransactions = (solanaWallet) => {
 
                     if (transaction.type === 'SWAP') {
                         const swapTransfers = transaction.tokenTransfers;
+
                         let modifiedDescription = transaction.description.match(/swapped\s.*/i);
 
                         if (modifiedDescription && modifiedDescription.length > 0) {
@@ -200,11 +170,21 @@ const useTransactions = (solanaWallet) => {
                                         token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
                                         amount: selectedTransfer.tokenAmount,
                                     };
+                                    // if entry.token is SOL ('So11111111111111111111111111111111111111112'), multiply entry.amount by 100 to simulate USDC conversion, and change entry.token to USDC ('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v') 
+                                    if (entry.token === 'So11111111111111111111111111111111111111112') {
+                                        entry.amount *= 100;
+                                        entry.token = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+                                    }
                                 } else if (!exit && entry.token !== (tokenMap[selectedTransfer.mint] || selectedTransfer.mint)) {
                                     exit = {
                                         token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
                                         amount: selectedTransfer.tokenAmount,
                                     };
+                                    // if exit.token is SOL ('So11111111111111111111111111111111111111112'), multiply exit.amount by 100 to simulate USDC conversion, and change exit.token to USDC ('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v') 
+                                    if (exit.token === 'So11111111111111111111111111111111111111112') {
+                                        exit.amount *= 100;
+                                        exit.token = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+                                    }
                                 }
                             });
 
@@ -273,6 +253,7 @@ const useTransactions = (solanaWallet) => {
         setTokenBalances(updatedTokenBalances);
         setIsLoading(false);
     };
+    console.log('tokenBalances:', tokenBalances);
 
     return { parseTransactions, walletData, isLoading, tokenBalances };
 };

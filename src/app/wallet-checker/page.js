@@ -13,10 +13,10 @@ const WalletChecker = () => {
     const { parseTransactions, walletData, isLoading, tokenBalances } = useTransactions(solanaWallet);
     const { prices, isLoading: pricesLoading } = useTokenPrices();
 
-    const handleCheckClick = () => {
+    const handleCheckClick = async () => {
         if (solanaWallet.trim()) {
-            parseTransactions();
-            toast.info("Data will be cached for 48 hours to minimize API calls.", {
+            await parseTransactions();
+            toast.info("Data will be cached for 24 hours to minimize API calls.", {
                 position: "bottom-center",
                 autoClose: 5000,
                 hideProgressBar: false,
