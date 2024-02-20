@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { parseISO, formatDistanceToNow } from 'date-fns';
 
+function isValidDate(dateString) {
+    const regEx = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+    return dateString.match(regEx) != null;
+}
+
 function convertToISO(dateStr) {
     try {
         console.log('Received date string:', dateStr);
@@ -21,8 +26,8 @@ function convertToISO(dateStr) {
 function parseDate(dateStr) {
     const isoDateStr = convertToISO(dateStr);
     console.log('Converted to ISO:', isoDateStr);
-    if (!isoDateStr) {
-        console.error('Invalid date string, unable to convert to ISO:', dateStr);
+    if (!isoDateStr || !isValidDate(isoDateStr)) {
+        console.error('Invalid date string, unable to convert to ISO or invalid ISO format:', dateStr);
         return null;
     }
     return parseISO(isoDateStr);
