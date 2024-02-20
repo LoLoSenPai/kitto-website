@@ -1,26 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { formatDistanceToNow } from 'date-fns';
+import { parseISO, formatDistanceToNow } from 'date-fns';
 
-function parseDate(dateStr) {
+function convertToISO(dateStr) {
     try {
+        console.log('Received date string:', dateStr);
         // Split the date string into parts
         const [date, time] = dateStr.split(' ');
         const [day, month, year] = date.split('/');
         const [hours, minutes, seconds] = time.split(':');
 
-        // Validate date parts
-        if (!day || !month || !year || !hours || !minutes || !seconds) {
-            throw new Error(`Invalid date string: ${dateStr}`);
-        }
-
-        // Construct a new Date object
-        return new Date(year, month - 1, day, hours, minutes, seconds);
+        const isoString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+        return isoString;
     } catch (error) {
-        console.error(error);
-        // Return null or a new Date with a fallback value
-        return null; // or new Date();
+        console.error('Error converting to ISO:', error);
+        return null;
     }
+}
+
+function parseDate(dateStr) {
+    const isoDateStr = convertToISO(dateStr);
+    if (!isoDateStr) {
+        console.error('Invalid date string, unable to convert to ISO:', dateStr);
+        return null;
+    }
+    return parseISO(isoDateStr);
 }
 
 const TransactionList = ({ transactions }) => {

@@ -8,7 +8,8 @@ let cache = {
 const CACHE_DURATION = 3600 * 1000; // 1 hour
 
 export async function fetchTokenPrices() {
-  if (cache.data && typeof cache.expiry === 'number' && Date.now() < cache.expiry) {
+  const now = Date.now();
+  if (cache.data && typeof cache.expiry === 'number' && now < cache.expiry) {
     console.log('Serving from cache');
     return cache.data;
   }
@@ -25,15 +26,21 @@ export async function fetchTokenPrices() {
 
   try {
     const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Network response was not ok.');
+    }
     const data = await response.json();
     cache = {
       data,
-      expiry: Date.now() + CACHE_DURATION,
+      expiry: now + CACHE_DURATION,
     };
     return data;
   } catch (error) {
     console.error('Failed to fetch token prices:', error);
-    // Serve stale data if available
-    return cache.data;
+    // Invalidate cache if fetch failed after expiry
+    if (now >= cache.expiry) {
+      cache.data = null; // or you might want to keep old data but mark it as stale
+    }
+    return cache.data || 'Fallback data or error message';
   }
-};
+}
