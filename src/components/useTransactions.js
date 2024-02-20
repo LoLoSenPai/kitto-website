@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { differenceInMilliseconds } from 'date-fns';
 
 const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
@@ -32,10 +33,18 @@ const useTransactions = (solanaWallet) => {
             const cachedTime = localStorage.getItem(cacheTimeKey);
             const now = new Date().getTime();
 
+            console.log('Now:', now);
+            console.log('Cached time:', cachedTime);
+
             // Verify if cache is valid
             if (cachedData && cachedTime) {
                 const parsedCachedTime = parseInt(cachedTime, 10);
-                if (now - parsedCachedTime < 24 * 60 * 60 * 1000) {
+                console.log('Parsed Cached Time:', parsedCachedTime);
+
+                const timeDifference = differenceInMilliseconds(now, parsedCachedTime);
+                console.log('Time Difference:', timeDifference);
+
+                if (timeDifference < 24 * 60 * 60 * 1000) {
                     const { walletData, tokenBalances } = JSON.parse(cachedData);
                     setWalletData(walletData);
                     setTokenBalances(tokenBalances);
@@ -46,6 +55,8 @@ const useTransactions = (solanaWallet) => {
         } catch (error) {
             console.error('Error reading from cache', error);
             // Handle error or invalidate cache
+            localStorage.removeItem(cacheKey);
+            localStorage.removeItem(cacheTimeKey);
         }
 
         setIsLoading(true);
