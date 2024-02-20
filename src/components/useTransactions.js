@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
@@ -17,6 +17,12 @@ const useTransactions = (solanaWallet) => {
         'HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3': '$PYTH',
         'J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn': '$JITO'
     };
+
+    useEffect(() => {
+        setWalletData([]);
+        setTokenBalances({});
+        console.log('Reset walletData and tokenBalances due to solanaWallet change');
+    }, [solanaWallet]);
 
     const parseTransactions = async () => {
         if (isLoading) return;

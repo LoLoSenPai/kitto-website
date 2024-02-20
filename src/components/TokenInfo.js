@@ -15,7 +15,6 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
     "$JTO": { id: "jito-governance-token", imageUrl: "https://assets.coingecko.com/coins/images/33228/standard/jto.png?1701137022", priceAtAirdrop: 2.06 },
   };
 
-  const usdcId = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
 
   const formatPrice = (price) => {
     const numberPrice = parseFloat(price);
@@ -117,16 +116,16 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
 
             const initialValueAirdropped = airdropped * tokenPriceAtAirdrop;
             const currentValueAirdropped = airdropped * currentPrice;
-            const pnlAirdropped = currentValueAirdropped - initialValueAirdropped;
-
+     
             const averageBuyPrice = boughtAmount > 0 ? boughtTotalCost / boughtAmount : 0;
-            const pnlFromBuying = boughtAmount * (currentPrice - averageBuyPrice);
-        
             const averageSellPrice = soldAmount > 0 ? soldTotalRevenue / soldAmount : 0;
-            const pnlFromSelling = soldAmount * (averageSellPrice - tokenPriceAtAirdrop);
 
-            const totalPnL = pnlAirdropped + pnlFromBuying + pnlFromSelling;
-
+            const pnlFromBuying = boughtAmount > 0 ? (currentPrice - averageBuyPrice) * boughtAmount : 0;
+            const pnlFromSelling = soldAmount > 0 ? (averageSellPrice - averageBuyPrice) * soldAmount : 0;
+    
+            // PnL total
+            const totalPnL = pnlFromBuying + pnlFromSelling;   
+        
             const pnlFormatted = totalPnL >= 0 ? `+${totalPnL.toFixed(2)}` : totalPnL.toFixed(2);
             const pnlClass = mode === "Portfolio" ? (totalPnL >= 0 ? 'text-green-500' : 'text-red-500') : 'text-green-500';
 
