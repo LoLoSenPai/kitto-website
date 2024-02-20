@@ -1,24 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { parse, formatDistanceToNow } from 'date-fns';
-
-function isValidDate(dateString) {
-    const regEx = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
-    return dateString.match(regEx) != null;
-}
-
-function parseDate(dateStr) {
-    try {
-        const [datePart, timePart] = dateStr.split(' ');
-        const [day, month, year] = datePart.split('/');
-        const [hours, minutes, seconds] = timePart.split(':');
-        const formattedDateStr = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${hours}:${minutes}:${seconds}`;
-        return parse(formattedDateStr, "yyyy-MM-dd'T'HH:mm:ss", new Date());
-    } catch (error) {
-        console.error('Error parsing date:', error);
-        return null;
-    }
-}
+import { formatDistanceToNow } from 'date-fns';
 
 const TransactionList = ({ transactions }) => {
     const [transactionListData, setTransactionListData] = useState([]);
@@ -33,8 +15,8 @@ const TransactionList = ({ transactions }) => {
                 <h2 className='my-5 ml-20 text-xl'>Transaction List</h2>
                 <div className='w-full'>
                     {transactionListData.map((transaction, index) => {
-                        const date = parseDate(transaction.timestamp);
-                        const distanceToNow = date ? formatDistanceToNow(date, { addSuffix: true }) : 'Unknown date';
+                        const date = new Date(transaction.timestamp);
+                        const distanceToNow = formatDistanceToNow(date, { addSuffix: true });
                         const borderColor = index % 2 === 0 ? 'border-amber-900' : 'border-amber-700';
                         if (!date) {
                             // Handle the error, skip rendering this transaction, or render with a fallback date

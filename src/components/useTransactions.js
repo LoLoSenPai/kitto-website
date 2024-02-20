@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { differenceInMilliseconds } from 'date-fns';
+import { format, differenceInMilliseconds } from 'date-fns';
 
 const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
@@ -255,7 +255,7 @@ const useTransactions = (solanaWallet) => {
                         description,
                         type: transaction.type,
                         source: transaction.source,
-                        timestamp: new Date(transaction.timestamp * 1000).toLocaleString(),
+                        timestamp: transaction.timestamp * 1000,
                         signature: transaction.signature,
                         airdropDetails,
                         swapDetails,
