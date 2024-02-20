@@ -5,6 +5,7 @@ import { Theme } from '@radix-ui/themes';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Navbar from "../components/Navbar";
+import { Analytics } from '@vercel/analytics/react';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,7 @@ export default function RootLayout({ children }) {
           <Navbar />
           {children}
           <ToastContainer position="bottom-center" autoClose={5000} hideProgressBar={false} closeOnClick={true} pauseOnHover={true} draggable={true} />
+          <Analytics />
         </Theme>
       </body>
     </html >

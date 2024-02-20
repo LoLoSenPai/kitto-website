@@ -88,7 +88,6 @@ const useTransactions = (solanaWallet) => {
                 }
 
                 const filteredTransactions = data.filter(transaction => {
-                    // console.log('transaction:', transaction);
                     const transactionTimestamp = transaction.timestamp * 1000;
 
                     if (transactionTimestamp <= timestamp19Nov2023) {
