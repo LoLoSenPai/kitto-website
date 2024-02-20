@@ -10,7 +10,7 @@ function convertToISO(dateStr) {
         const [day, month, year] = date.split('/');
         const [hours, minutes, seconds] = time.split(':');
 
-        const isoString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+        const isoString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`;
         return isoString;
     } catch (error) {
         console.error('Error converting to ISO:', error);
@@ -20,6 +20,7 @@ function convertToISO(dateStr) {
 
 function parseDate(dateStr) {
     const isoDateStr = convertToISO(dateStr);
+    console.log('Converted to ISO:', isoDateStr);
     if (!isoDateStr) {
         console.error('Invalid date string, unable to convert to ISO:', dateStr);
         return null;
