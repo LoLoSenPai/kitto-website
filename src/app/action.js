@@ -30,9 +30,13 @@ export async function fetchTokenPrices() {
       throw new Error('Network response was not ok.');
     }
     const data = await response.json();
+    const futureExpiry = new Date(now + CACHE_DURATION);
+    if (futureExpiry <= now) {
+      throw new Error('Calculated expiry is not in the future. Possible system clock issue.');
+    }
     cache = {
       data,
-      expiry: now + CACHE_DURATION,
+      expiry: futureExpiry.getTime(),
     };
     return data;
   } catch (error) {
