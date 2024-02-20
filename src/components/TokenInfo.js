@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useTokenPrices } from './useTokenPrices';
 
 const TokenInfo = ({ transactions, tokenBalances, mode }) => {
-  console.log('Token Balances at TokenInfo start:', tokenBalances);
 
   const [isLoading, setIsLoading] = useState(true);
   const [tokenData, setTokenData] = useState({});
