@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { format, differenceInMilliseconds } from 'date-fns';
+import { differenceInMilliseconds } from 'date-fns';
+import { fetchTransactions } from '../app/actions/fetchTransactions.js';
 
 const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
@@ -71,202 +72,206 @@ const useTransactions = (solanaWallet) => {
                 url += `&before=${lastSignature}`;
             }
 
-            const response = await fetch(url);
-            const data = await response.json();
+            try {
+                const data = await fetchTransactions(solanaWallet, lastSignature);
 
-            if (data && data.length > 0) {
+                if (data && data.length > 0) {
 
-                // Verify if PYTH airdrop has been received
-                const pythAirdrop = relevantInfo.find(transaction => {
-                    return transaction.description.includes("$PYTH") &&
-                        transaction.description.includes("airdropped");
-                });
-
-                if (pythAirdrop) {
-                    console.log("PYTH airdrop received. Stopping further fetch.");
-                    break; // Stop fetching transactions
-                }
-
-                const filteredTransactions = data.filter(transaction => {
-                    const transactionTimestamp = transaction.timestamp * 1000;
-
-                    if (transactionTimestamp <= timestamp19Nov2023) {
-                        return false; // Exclude transactions on or before 19th November 2023
-                    }
-
-                    return transaction.tokenTransfers.some(transfer =>
-                        Object.keys(tokenMap).includes(transfer.mint) &&
-                        (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet)
-                    ) && transaction.type !== "TOKEN_MINT";
-                });
-
-                if (filteredTransactions.length === 0) {
-                    console.log("No more relevant transactions available. Stopping further fetch.");
-                    break; // Stop fetching transactions
-                }
-
-                const finalFilteredTransactions = filteredTransactions.filter(transaction => transaction.type !== "CREATE_ORDER");
-
-                relevantInfo = relevantInfo.concat(finalFilteredTransactions.map(transaction => {
-                    let description = transaction.description || 'No description';
-                    let airdropDetails = {};
-                    let swapDetails = {};
-                    let transferDetails = {};
-
-                    const tokenTransfers = transaction.tokenTransfers.filter(transfer =>
-                        Object.keys(tokenMap).includes(transfer.mint) &&
-                        (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet)
-                    );
-
-                    tokenTransfers.forEach(transfer => {
-                        const tokenName = tokenMap[transfer.mint] || transfer.mint;
-
-                        if (!updatedTokenBalances[tokenName]) {
-                            updatedTokenBalances[tokenName] = 0;
-                        }
-
-                        if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
-                            // Airdrop
-                            updatedTokenBalances[tokenName] += transfer.tokenAmount;
-                        } else if (transaction.type === 'SWAP' && transfer.toUserAccount === solanaWallet) {
-                            // Swap received
-                            updatedTokenBalances[tokenName] += transfer.tokenAmount;
-                        } else if (transaction.type === 'SWAP' && transfer.fromUserAccount === solanaWallet) {
-                            // Swap sent
-                            updatedTokenBalances[tokenName] -= transfer.tokenAmount;
-                        } else if (transaction.type === 'TRANSFER' && transfer.toUserAccount === solanaWallet) {
-                            // Transfer received
-                            updatedTokenBalances[tokenName] += transfer.tokenAmount;
-                        } else if (transaction.type === 'TRANSFER' && transfer.fromUserAccount === solanaWallet) {
-                            // Transfer sent
-                            updatedTokenBalances[tokenName] -= transfer.tokenAmount;
-                        } else {
-                            console.log("Unknown transaction type: ", transaction.type);
-                        }
-
-                        // Airdrops with UNKNOWN type
-                        if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
-                            description = `Was airdropped ${transfer.tokenAmount} ${tokenName}`;
-                            airdropDetails[tokenName] = (airdropDetails[tokenName] || 0) + transfer.tokenAmount;
-                        } else if (transaction.type === 'UNKNOWN' && transfer.fromUserAccount === solanaWallet) {
-                            description = `Staked ${transfer.tokenAmount} ${tokenName}`;
-                            transferDetails = {
-                                sentToken: tokenName,
-                                sentAmount: transfer.tokenAmount,
-                            };
-                        }
+                    // Verify if PYTH airdrop has been received
+                    const pythAirdrop = relevantInfo.find(transaction => {
+                        return transaction.description.includes("$PYTH") &&
+                            transaction.description.includes("airdropped");
                     });
 
-                    if (transaction.type === 'SWAP') {
-                        const swapTransfers = transaction.tokenTransfers;
+                    if (pythAirdrop) {
+                        console.log("PYTH airdrop received. Stopping further fetch.");
+                        break; // Stop fetching transactions
+                    }
 
-                        let modifiedDescription = transaction.description.match(/swapped\s.*/i);
+                    const filteredTransactions = data.filter(transaction => {
+                        const transactionTimestamp = transaction.timestamp * 1000;
 
-                        if (modifiedDescription && modifiedDescription.length > 0) {
-                            description = modifiedDescription[0].charAt(0).toUpperCase() + modifiedDescription[0].slice(1);
+                        if (transactionTimestamp <= timestamp19Nov2023) {
+                            return false; // Exclude transactions on or before 19th November 2023
                         }
 
-                        if (swapTransfers.length >= 2) {
-                            let transferGroups = {};
+                        return transaction.tokenTransfers.some(transfer =>
+                            Object.keys(tokenMap).includes(transfer.mint) &&
+                            (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet)
+                        ) && transaction.type !== "TOKEN_MINT";
+                    });
 
-                            swapTransfers.forEach((transfer) => {
-                                if (transfer.tokenAmount !== 0) {
-                                    if (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet) {
-                                        const tokenName = tokenMap[transfer.mint] || transfer.mint;
+                    if (filteredTransactions.length === 0) {
+                        console.log("No more relevant transactions available. Stopping further fetch.");
+                        break; // Stop fetching transactions
+                    }
 
-                                        if (!transferGroups[tokenName]) {
-                                            transferGroups[tokenName] = [];
-                                        }
+                    const finalFilteredTransactions = filteredTransactions.filter(transaction => transaction.type !== "CREATE_ORDER");
 
-                                        transferGroups[tokenName].push(transfer);
-                                    }
-                                }
-                            });
+                    relevantInfo = relevantInfo.concat(finalFilteredTransactions.map(transaction => {
+                        let description = transaction.description || 'No description';
+                        let airdropDetails = {};
+                        let swapDetails = {};
+                        let transferDetails = {};
 
-                            let entry, exit;
+                        const tokenTransfers = transaction.tokenTransfers.filter(transfer =>
+                            Object.keys(tokenMap).includes(transfer.mint) &&
+                            (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet)
+                        );
 
-                            Object.values(transferGroups).forEach((group) => {
-                                group.sort((a, b) => b.tokenAmount - a.tokenAmount);
-                                const selectedTransfer = group[0];
+                        tokenTransfers.forEach(transfer => {
+                            const tokenName = tokenMap[transfer.mint] || transfer.mint;
 
-                                if (!entry) {
-                                    entry = {
-                                        token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
-                                        amount: selectedTransfer.tokenAmount,
-                                    };
-                                    // if entry.token is SOL ('So11111111111111111111111111111111111111112'), multiply entry.amount by 100 to simulate USDC conversion, and change entry.token to USDC ('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v') 
-                                    if (entry.token === 'So11111111111111111111111111111111111111112') {
-                                        entry.amount *= 100;
-                                        entry.token = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-                                    }
-                                } else if (!exit && entry.token !== (tokenMap[selectedTransfer.mint] || selectedTransfer.mint)) {
-                                    exit = {
-                                        token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
-                                        amount: selectedTransfer.tokenAmount,
-                                    };
-                                    // if exit.token is SOL ('So11111111111111111111111111111111111111112'), multiply exit.amount by 100 to simulate USDC conversion, and change exit.token to USDC ('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v') 
-                                    if (exit.token === 'So11111111111111111111111111111111111111112') {
-                                        exit.amount *= 100;
-                                        exit.token = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-                                    }
-                                }
-                            });
+                            if (!updatedTokenBalances[tokenName]) {
+                                updatedTokenBalances[tokenName] = 0;
+                            }
 
-                            if (entry && exit) {
-                                swapDetails = {
-                                    entry,
-                                    exit,
+                            if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
+                                // Airdrop
+                                updatedTokenBalances[tokenName] += transfer.tokenAmount;
+                            } else if (transaction.type === 'SWAP' && transfer.toUserAccount === solanaWallet) {
+                                // Swap received
+                                updatedTokenBalances[tokenName] += transfer.tokenAmount;
+                            } else if (transaction.type === 'SWAP' && transfer.fromUserAccount === solanaWallet) {
+                                // Swap sent
+                                updatedTokenBalances[tokenName] -= transfer.tokenAmount;
+                            } else if (transaction.type === 'TRANSFER' && transfer.toUserAccount === solanaWallet) {
+                                // Transfer received
+                                updatedTokenBalances[tokenName] += transfer.tokenAmount;
+                            } else if (transaction.type === 'TRANSFER' && transfer.fromUserAccount === solanaWallet) {
+                                // Transfer sent
+                                updatedTokenBalances[tokenName] -= transfer.tokenAmount;
+                            } else {
+                                console.log("Unknown transaction type: ", transaction.type);
+                            }
+
+                            // Airdrops with UNKNOWN type
+                            if (transaction.type === 'UNKNOWN' && transfer.toUserAccount === solanaWallet) {
+                                description = `Was airdropped ${transfer.tokenAmount} ${tokenName}`;
+                                airdropDetails[tokenName] = (airdropDetails[tokenName] || 0) + transfer.tokenAmount;
+                            } else if (transaction.type === 'UNKNOWN' && transfer.fromUserAccount === solanaWallet) {
+                                description = `Staked ${transfer.tokenAmount} ${tokenName}`;
+                                transferDetails = {
+                                    sentToken: tokenName,
+                                    sentAmount: transfer.tokenAmount,
                                 };
+                            }
+                        });
+
+                        if (transaction.type === 'SWAP') {
+                            const swapTransfers = transaction.tokenTransfers;
+
+                            let modifiedDescription = transaction.description.match(/swapped\s.*/i);
+
+                            if (modifiedDescription && modifiedDescription.length > 0) {
+                                description = modifiedDescription[0].charAt(0).toUpperCase() + modifiedDescription[0].slice(1);
+                            }
+
+                            if (swapTransfers.length >= 2) {
+                                let transferGroups = {};
+
+                                swapTransfers.forEach((transfer) => {
+                                    if (transfer.tokenAmount !== 0) {
+                                        if (transfer.fromUserAccount === solanaWallet || transfer.toUserAccount === solanaWallet) {
+                                            const tokenName = tokenMap[transfer.mint] || transfer.mint;
+
+                                            if (!transferGroups[tokenName]) {
+                                                transferGroups[tokenName] = [];
+                                            }
+
+                                            transferGroups[tokenName].push(transfer);
+                                        }
+                                    }
+                                });
+
+                                let entry, exit;
+
+                                Object.values(transferGroups).forEach((group) => {
+                                    group.sort((a, b) => b.tokenAmount - a.tokenAmount);
+                                    const selectedTransfer = group[0];
+
+                                    if (!entry) {
+                                        entry = {
+                                            token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
+                                            amount: selectedTransfer.tokenAmount,
+                                        };
+                                        // if entry.token is SOL ('So11111111111111111111111111111111111111112'), multiply entry.amount by 100 to simulate USDC conversion, and change entry.token to USDC ('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v') 
+                                        if (entry.token === 'So11111111111111111111111111111111111111112') {
+                                            entry.amount *= 100;
+                                            entry.token = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+                                        }
+                                    } else if (!exit && entry.token !== (tokenMap[selectedTransfer.mint] || selectedTransfer.mint)) {
+                                        exit = {
+                                            token: tokenMap[selectedTransfer.mint] || selectedTransfer.mint,
+                                            amount: selectedTransfer.tokenAmount,
+                                        };
+                                        // if exit.token is SOL ('So11111111111111111111111111111111111111112'), multiply exit.amount by 100 to simulate USDC conversion, and change exit.token to USDC ('EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v') 
+                                        if (exit.token === 'So11111111111111111111111111111111111111112') {
+                                            exit.amount *= 100;
+                                            exit.token = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+                                        }
+                                    }
+                                });
+
+                                if (entry && exit) {
+                                    swapDetails = {
+                                        entry,
+                                        exit,
+                                    };
+                                } else {
+                                    console.log("Not enough swap transfers found.");
+                                }
                             } else {
                                 console.log("Not enough swap transfers found.");
                             }
-                        } else {
-                            console.log("Not enough swap transfers found.");
                         }
-                    }
 
-                    if (transaction.type === 'TRANSFER') {
-                        const transferIn = tokenTransfers.find(t => t.toUserAccount === solanaWallet);
-                        const transferOut = tokenTransfers.find(t => t.fromUserAccount === solanaWallet);
+                        if (transaction.type === 'TRANSFER') {
+                            const transferIn = tokenTransfers.find(t => t.toUserAccount === solanaWallet);
+                            const transferOut = tokenTransfers.find(t => t.fromUserAccount === solanaWallet);
 
-                        if (transferIn && !transferOut) {
-                            description = `Received ${transferIn.tokenAmount} ${tokenMap[transferIn.mint] || transferIn.mint}`;
-                            transferDetails = {
-                                receivedToken: tokenMap[transferIn.mint] || transferIn.mint,
-                                receivedAmount: transferIn.tokenAmount,
-                            };
-                        } else if (transferIn && transferOut) {
-                            description = `Sent ${transferOut.tokenAmount} ${tokenMap[transferOut.mint] || transferOut.mint} to ${transferIn.toUserAccount}`;
-                            transferDetails = {
-                                sentToken: tokenMap[transferOut.mint] || transferOut.mint,
-                                sentAmount: transferOut.tokenAmount,
-                            };
-                        } else if (!transferIn && transferOut) {
-                            description = `Sent ${transferOut.tokenAmount} ${tokenMap[transferOut.mint] || transferOut.mint} to ${transferOut.toUserAccount}`;
-                            transferDetails = {
-                                sentToken: tokenMap[transferOut.mint] || transferOut.mint,
-                                sentAmount: transferOut.tokenAmount,
-                            };
+                            if (transferIn && !transferOut) {
+                                description = `Received ${transferIn.tokenAmount} ${tokenMap[transferIn.mint] || transferIn.mint}`;
+                                transferDetails = {
+                                    receivedToken: tokenMap[transferIn.mint] || transferIn.mint,
+                                    receivedAmount: transferIn.tokenAmount,
+                                };
+                            } else if (transferIn && transferOut) {
+                                description = `Sent ${transferOut.tokenAmount} ${tokenMap[transferOut.mint] || transferOut.mint} to ${transferIn.toUserAccount}`;
+                                transferDetails = {
+                                    sentToken: tokenMap[transferOut.mint] || transferOut.mint,
+                                    sentAmount: transferOut.tokenAmount,
+                                };
+                            } else if (!transferIn && transferOut) {
+                                description = `Sent ${transferOut.tokenAmount} ${tokenMap[transferOut.mint] || transferOut.mint} to ${transferOut.toUserAccount}`;
+                                transferDetails = {
+                                    sentToken: tokenMap[transferOut.mint] || transferOut.mint,
+                                    sentAmount: transferOut.tokenAmount,
+                                };
+                            }
                         }
-                    }
 
-                    return {
-                        description,
-                        type: transaction.type,
-                        source: transaction.source,
-                        timestamp: transaction.timestamp * 1000,
-                        signature: transaction.signature,
-                        airdropDetails,
-                        swapDetails,
-                        transferDetails,
-                    };
-                }));
+                        return {
+                            description,
+                            type: transaction.type,
+                            source: transaction.source,
+                            timestamp: transaction.timestamp * 1000,
+                            signature: transaction.signature,
+                            airdropDetails,
+                            swapDetails,
+                            transferDetails,
+                        };
+                    }));
 
-                console.log("Relevant Transaction Details: ", JSON.stringify(relevantInfo, null, 2));
+                    console.log("Relevant Transaction Details: ", JSON.stringify(relevantInfo, null, 2));
 
-                lastSignature = data[data.length - 1].signature;
-            } else {
-                console.log("No more transactions available.");
+                    lastSignature = data[data.length - 1].signature;
+                } else {
+                    console.log("No more transactions available.");
+                    break;
+                }
+            } catch (error) {
+                console.error('Error fetching transactions:', error);
                 break;
             }
         }
