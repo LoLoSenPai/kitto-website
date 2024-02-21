@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { differenceInMilliseconds } from 'date-fns';
-import { fetchTransactions } from '../app/actions/fetchTransactions.js';
+import { fetchTransactions } from '../app/fetchTransactions';
 
 const useTransactions = (solanaWallet) => {
     const [walletData, setWalletData] = useState([]);
