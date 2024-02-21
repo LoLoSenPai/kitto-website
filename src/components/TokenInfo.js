@@ -129,7 +129,7 @@ const TokenInfo = ({ transactions, tokenBalances, mode }) => {
             const pnlClass = mode === "Portfolio" ? (totalPnL >= 0 ? 'text-green-500' : 'text-red-500') : 'text-green-500';
 
             return (
-              <div key={token} className={`grid ${gridClass} p-2 text-center bg-white rounded-lg shadow-lg bg-opacity-60 text-sm md:text-md`}>
+              <div key={token} className={`grid ${gridClass} p-2 text-center items-center	 bg-white rounded-lg shadow-lg bg-opacity-60 text-xs md:text-md`}>
                 <div className='flex items-center justify-center'>
                   <img src={tokenImageUrl} alt="Logo of the token" className='w-6 h-6 mr-2 rounded-full' />
                   {token}

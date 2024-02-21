@@ -27,9 +27,9 @@ const TransactionList = ({ transactions }) => {
                         return (
                             <React.Fragment key={index}>
                                 <Link href={`https://solscan.io/tx/${transaction.signature}`} target='_blank' rel='noopener noreferrer'>
-                                    <div className='flex flex-col justify-between py-4 mx-8 text-sm transition-transform duration-200 ease-in-out cursor-pointer md:items-center md:flex-row md:text-md lg:text-md xl:text-lg hover:scale-105'>
-                                        <span className=''>{transaction.description}</span>
-                                        <span className='font-bold md:font-normal'>{distanceToNow}</span>
+                                    <div className='flex flex-col justify-between py-4 mx-8 text-sm transition-transform duration-200 ease-in-out cursor-pointer md:items-center md:flex-row md:text-md hover:scale-105'>
+                                        <span className='xl:text-lg'>{transaction.description}</span>
+                                        <span className='font-bold md:font-normal text-end'>{distanceToNow}</span>
                                     </div>
                                 </Link>
                                 {index < transactionListData.length - 1 && (
