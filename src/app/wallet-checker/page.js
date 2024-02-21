@@ -29,7 +29,7 @@ const WalletChecker = () => {
     };
 
     return (
-        <main className="flex flex-col min-h-screen px-4 pt-24 space-y-5 sm:px-8 lg:p-24">
+        <main className="flex flex-col min-h-screen px-4 pt-32 space-y-5 md:pt-24 sm:px-8 lg:p-24">
             <div className='flex items-center justify-center pt-4 space-x-2'>
                 <input
                     type="text"
