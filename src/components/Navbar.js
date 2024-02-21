@@ -25,17 +25,18 @@ const Navbar = () => {
   return (
     <nav className={`transition-transform duration-300 ${showNavbar ? 'translate-y-0' : '-translate-y-full'} fixed top-0 left-0 right-0 z-50 flex items-center justify-between w-full p-4 max-w-[1400px] mx-auto`}>
       <Link href="/">
-        <div className="inline-flex items-center justify-center w-16 h-16 md:h-20 md:w-32">
+        <div className="inline-flex items-center justify-center w-16 h-16 md:h-20 md:w-32 active:scale-95">
           <img
             src="/logo-kitto.png"
-            alt="Kitto"
+            alt="Logo Kitto"
+            className="transition-transform duration-150 ease-in-out"
             width={395}
             height={290}
           />
         </div>
       </Link>
       <Link href="/wallet-checker">
-        <div className="w-21 md:w-[180px] text-center bg-white/50 rounded-xl p-2">
+        <div className="w-21 md:w-[180px] text-center bg-white/50 rounded-xl p-2 active:bg-white/70 active:scale-95 transition duration-150 ease-in-out">
           <span className="text-lg font-bold">Airdrop Checker</span>
         </div>
       </Link>
