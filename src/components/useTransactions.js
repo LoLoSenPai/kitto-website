@@ -45,7 +45,7 @@ const useTransactions = (solanaWallet) => {
                 const timeDifference = differenceInMilliseconds(now, parsedCachedTime);
                 console.log('Time Difference:', timeDifference);
 
-                if (timeDifference < 24 * 60 * 60 * 1000) {
+                if (timeDifference < 6 * 60 * 60 * 1000) {
                     const { walletData, tokenBalances } = JSON.parse(cachedData);
                     setWalletData(walletData);
                     setTokenBalances(tokenBalances);

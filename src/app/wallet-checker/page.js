@@ -16,7 +16,7 @@ const WalletChecker = () => {
     const handleCheckClick = async () => {
         if (solanaWallet.trim()) {
             parseTransactions();
-            toast.info("Data will be cached for 24 hours to minimize API calls.", {
+            toast.info("Data will be cached for 6 hours to minimize API calls.", {
                 position: "bottom-center",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -29,7 +29,7 @@ const WalletChecker = () => {
     };
 
     return (
-        <main className="flex flex-col min-h-screen p-4 space-y-5 sm:p-8 lg:p-24">
+        <main className="flex flex-col min-h-screen px-4 pt-24 space-y-5 sm:px-8 lg:p-24">
             <div className='flex items-center justify-center pt-4 space-x-2'>
                 <input
                     type="text"
